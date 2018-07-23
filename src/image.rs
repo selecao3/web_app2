@@ -22,6 +22,8 @@ mod schema {
     post_img (id) {
         id -> Nullable<Int4>,
         account -> Varchar,
+        title -> Varchar,
+        body -> Text,
         img_url_1 -> Text,
         regulation -> Bool,
 
@@ -37,19 +39,23 @@ use self::schema::post_img::dsl::{post_img as all_post_img, regulation as post_i
 pub struct PostImg {
     id: Option<i32>,
     account: String,
+    title: String,
+    body: String,
     img_url_1: String,
     regulation: bool
 }
 
 #[derive(FromForm)]
 struct PostImgForm{
+    title: String,
+    body: String,
     img_url_1: String,
     /*    regulation: bool,*/
 }
 
 
 
-#[post("/form_img", data = "<data>")]
+#[post("/form", data = "<data>")]
 // signature requires the request to have a `Content-Type`
 fn multipart_upload(cont_type: &ContentType, data: Data, conn:Connection) -> Result<Stream<Cursor<Vec<u8>>>, Custom<String>> {
     // this and the next check can be implemented as a request guard but it seems like just
@@ -113,26 +119,40 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection) -> 
     {
 
         /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
-        let aaa = &entries.fields.get(&"file".to_string()).unwrap().get(0).unwrap().data;
-        if let SavedData::File(bbb,ccc) = aaa{
+        let file_data = &entries.fields.get(&"file".to_string()).unwrap().get(0).unwrap().data;
+        let title_data = &entries.fields.get(&"title".to_string()).unwrap().get(0).unwrap().data;
+        let body_data = &entries.fields.get(&"body".to_string()).unwrap().get(0).unwrap().data;
+
+        let mut tmp:Vec<String> = Vec::new();
+
+        if let SavedData::File(bbb,ccc) = file_data{
             println!("{:?}", bbb);
              let mut s = bbb.to_str().unwrap().to_string();
             s.push_str(".png");
             rename(bbb.to_str().unwrap(),s.trim() ).unwrap();
             println!("{}",s.trim_left_matches("static/").to_string());
             //file名を*.pngに変更している.
+            let file_path = s.trim_left_matches("static/").to_string();
 
+            tmp.push(file_path);
 
-/*            let re = Regex::new(r"[static/]").unwrap();
-            let result = re.replace_all(s.trim(), "");*/
-
-
-            let t = PostImgForm{
-                img_url_1: s.trim_left_matches("static/").to_string()
-            };
-            insert(t,&conn);
 
         }
+        if let SavedData::Text(title_string) = title_data{
+            println!("{}",title_string);
+            tmp.push(title_string.to_string());
+        }
+        if let SavedData::Text(body_string) = body_data{
+            println!("{}",body_string);
+            tmp.push(body_string.to_string());
+        }
+        let t = PostImgForm{
+            title:tmp[1].clone(),
+            body:tmp[2].clone(),
+            img_url_1:tmp[0].clone(),
+        };
+        insert(t,&conn);
+
 
         /*        let hoge = entries.save_dir;
                 let hage = Perm(hoge.into_path());*/
@@ -152,6 +172,8 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection) -> bool{
     let t = PostImg{
         id: None,
         account: "root".to_string(),
+        title:postimgform.title,
+        body: postimgform.body,
         img_url_1: postimgform.img_url_1,
         //保存したimg_urlをどうにかしてPost structへ・・・
         regulation: false

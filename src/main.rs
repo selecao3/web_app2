@@ -349,7 +349,7 @@ fn insert(postform:PostForm, conn: &PgConnection) -> bool{
 }
 use rocket::response::Flash;
 
-#[post("/form", data = "<toukou_form>")]
+#[post("/form_hoge", data = "<toukou_form>")]
 fn new(toukou_form: Form<PostForm>, connection: db::Connection) -> Flash<Redirect>{
     let t = toukou_form.into_inner();
 

@@ -113,16 +113,14 @@
 
 
     {% for i in post_img %}
-        {% for hoge in post %}
 
             <div class="jumbotron">
-                <h3 class="display-4">{{ hoge.title }}</h3>
-                <pre><p class="lead">{{ hoge.body }}</p></pre>
+                <h3 class="display-4">{{ i.title }}</h3>
+                <pre><p class="lead">{{ i.body }}</p></pre>
                 <p class="lead">
                     <img src="{{ i.img_url_1 }}" alt="">
                 </p>
             </div>
-        {% endfor %}
     {% endfor %}
 
 
