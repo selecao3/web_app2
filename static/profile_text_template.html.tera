@@ -1,0 +1,10 @@
+{% block text %}
+{% set flag = 1 %}
+<div class="card-body" id="change_to_form">
+    <p class="card-text" id="Text01">
+        <span style="font-style: italic" id="Text02">
+            { }}
+            </span>
+    </p>
+</div>
+{% endblock text %}

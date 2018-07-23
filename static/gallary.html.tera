@@ -1,0 +1,26 @@
+{% extends "Home"%}
+{% block content %}
+    <div class="bs-component">
+        <table class="table table-hover">
+            <tbody>
+                <tr class="table-active">
+                    <!--1ブロック分-->
+                    <td>
+
+                            <a href="">
+                                <img style="height: 200px; width: 100%; display: block;" src="./dist/picture/ducati01.png" alt="Card image">
+                            </a>
+                            <!--特に名前などは追加せず、画像にアンカータグをつける-->
+                    </td>
+                    <!--1ブロック分-->
+                    <td>
+                            <img style="height: 200px; width: 100%; display: block;" src="./dist/picture/ducati01.png" alt="Card image">
+                    </td>
+                    <td>
+                            <img style="height: 200px; width: 100%; display: block;" src="./dist/picture/ducati01.png" alt="Card image">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock content %}

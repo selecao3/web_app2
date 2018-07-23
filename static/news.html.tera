@@ -1,0 +1,40 @@
+{% extends "Home" %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header" id="banner">
+        <div class="row my-4">
+            <div class="col-12">
+                <h1 class="display-4" >同人誌サイト（仮）</h1>
+                <p class="lead">
+                    あなたのお気に入りの作家さんを見つけよう
+                </p>
+            </div>
+        </div>
+    </div>
+    <style>
+        div#tmp{
+            width: 800px;
+            margin-top: 12em;
+        }
+    </style>
+
+    <div id="tmp" class="col-lg-12">
+        <div class="page-header">
+            <h1 style="margin-bottom: 20px">Latest news</h1>
+        </div>
+
+        <!--block-->
+        <div class="bs-component">
+                {{name}}さんがタイトル「{{name}}」を投稿しました！
+                <hr>
+                〇〇さんがタイトル「△△」を投稿しました！
+                <hr>
+                </div>
+                <!--block-->
+                
+                </div>
+                <!--block-->
+                
+                </div>
+{% endblock content %}

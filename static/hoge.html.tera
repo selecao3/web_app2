@@ -1,0 +1,57 @@
+<!doctype html>
+<html>
+<head>
+    <script src="https://www.dropbox.com/static/api/dropbox-datastores-1.0-latest.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <center>
+        <button id="writeButton">Click to create <code>hello.txt</code> in Dropbox.</button>
+    </center>
+
+    <script>
+        // ※デベロッパーサイトで入手したAPP KEY
+        var client = new Dropbox.Client({ key: 'mwh4ux4df73vvuj' });
+
+        // AOuth認証を実行
+        client.authenticate({ interactive: false }, function (error) {
+            if (error) {
+                alert('Error: ' + error);
+            } else {
+                console.log("authorized successfully");
+            }
+        });
+
+        // Dropboxにファイル書き込み
+        function doWriteFile() {
+
+            client.writeFile('hello.txt', 'Hello, World!', function (error) {
+                if (error) {
+                    alert('Error: ' + error);
+                } else {
+                    alert('File written successfully!');
+                }
+            });
+
+        }
+
+        // ボタンが押された時の処理
+        document.getElementById('writeButton').onclick = function () {
+            client.authenticate(function (error, client) {
+                if (error) {
+                    alert('Error: ' + error);
+                } else {
+                    doWriteFile();
+                }
+            });
+        }
+    </script>
+
+
+    <form name="form">
+        FileName:<input id="titleText" type="text" size="30" maxlength="20"> <br>
+        <textarea id="contentText" rows="4" cols="40"></textarea><br>
+    </form>
+    <button id="saveButton">Save</button>
+</body>
+</html>

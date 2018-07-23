@@ -1,0 +1,39 @@
+{
+  "name": "Umi",
+  "description": "Umi is one of the Bootstrap original theme.",
+  "keywords": [
+    "css",
+    "sass",
+    "bootstrap",
+    "japanese",
+    "theme",
+    "responsive",
+    "front-end",
+    "framework",
+    "web",
+    "lovelive"
+  ],
+  "author": "ysakasin",
+  "homepage": "https://ysakasin.github.io/Umi/",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/ysakasin/Umi.git"
+  },
+  "license": "MIT",
+  "moduleType": "globals",
+  "main": [
+    "dist/css/bootstrap.min.css"
+  ],
+  "ignore": [
+    "build",
+    "docs",
+    "scss",
+    "/.*",
+    "appveyor.yml",
+    "CNAME"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "bootstrap": "4.0.0"
+  }
+}
