@@ -49,7 +49,7 @@ struct PostImgForm{
 
 
 
-#[post("/unko", data = "<data>")]
+#[post("/form_img", data = "<data>")]
 // signature requires the request to have a `Content-Type`
 fn multipart_upload(cont_type: &ContentType, data: Data, conn:Connection) -> Result<Stream<Cursor<Vec<u8>>>, Custom<String>> {
     // this and the next check can be implemented as a request guard but it seems like just
@@ -119,6 +119,7 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection) -> 
              let mut s = bbb.to_str().unwrap().to_string();
             s.push_str(".png");
             rename(bbb.to_str().unwrap(),s.trim() ).unwrap();
+            println!("{}",s.trim_left_matches("static/").to_string());
             //file名を*.pngに変更している.
 
 
@@ -127,7 +128,7 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection) -> 
 
 
             let t = PostImgForm{
-                img_url_1: s.trim_left_matches('/').to_string()
+                img_url_1: s.trim_left_matches("static/").to_string()
             };
             insert(t,&conn);
 

@@ -349,7 +349,7 @@ fn insert(postform:PostForm, conn: &PgConnection) -> bool{
 }
 use rocket::response::Flash;
 
-#[post("/text", data = "<toukou_form>")]
+#[post("/form", data = "<toukou_form>")]
 fn new(toukou_form: Form<PostForm>, connection: db::Connection) -> Flash<Redirect>{
     let t = toukou_form.into_inner();
 
@@ -357,7 +357,7 @@ fn new(toukou_form: Form<PostForm>, connection: db::Connection) -> Flash<Redirec
     if insert(t,&connection) {
         println!("成功してる");
 
-        Flash::success(Redirect::to("/creater/account"), "成功してる")
+        Flash::success(Redirect::to("/creater/account/post/form_img"), "成功してる")
     } else {
         println!("失敗");
         Flash::error(Redirect::to("/creater/account"), "失敗した。")
@@ -365,7 +365,7 @@ fn new(toukou_form: Form<PostForm>, connection: db::Connection) -> Flash<Redirec
 }
 
 
-#[post("/form", data = "<toukou>")]
+/*#[post("/form", data = "<toukou>")]
 fn article(toukou: Form<PostForm>, connection: db::Connection) -> Flash<Redirect>{
     let t = toukou.into_inner();
 
@@ -377,7 +377,7 @@ fn article(toukou: Form<PostForm>, connection: db::Connection) -> Flash<Redirect
         println!("失敗");
         Flash::error(Redirect::to("/creater/account"), "失敗した。")
     }
-}
+}*/
 
 
 use std::env;
@@ -454,9 +454,9 @@ fn main() {
     rocket::ignite()
         .mount("/", routes![
 home,creater,images,about_me,signup,login,
-all,creater_static,hoge,files,multipart_upload
+all,creater_static,hoge,files
 ])
-        .mount("/creater/account/post/", routes![new,article,upload])
+        .mount("/creater/account/post/", routes![new,upload,multipart_upload])
         .manage(db::connect())
         .attach(Template::fairing())
 
