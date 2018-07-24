@@ -82,7 +82,7 @@ fn process_upload(boundary: &str, data: Data, conn:Connection) -> io::Result<Vec
     // saves all fields, any field longer than 10kB goes to a temporary directory
     // Entries could implement FromData though that would give zero control over
     // how the files are saved; Multipart would be a good impl candidate though
-    match Multipart::with_body(data.open(), boundary).save().with_dir("static/post_image") {
+    match Multipart::with_body(data.open(), boundary).save().size_limit(None).with_dir("static/post_image"){
         //全てのフィールドを一旦保存する
         Full(entries) => process_entries(entries, &mut out, conn)?,
         //成功,entriesにはフィールドが全て詰まっている
@@ -171,7 +171,7 @@ use diesel::prelude::*;
 fn insert(postimgform:PostImgForm, conn: &PgConnection) -> bool{
     let t = PostImg{
         id: None,
-        account: "root".to_string(),
+        account: "rot".to_string(),
         title:postimgform.title,
         body: postimgform.body,
         img_url_1: postimgform.img_url_1,
@@ -183,6 +183,8 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection) -> bool{
 pub fn read_post_img(connection: &PgConnection) -> Vec<PostImg> {
     //postsテーブルからデータを読み取る。
     all_post_img
+        .filter(post_img::account.eq("root"))
+        //accountが◯◯のものを取り出す
         .order(post_img::id.desc())
         .load::<PostImg>(connection)
         .expect("error")

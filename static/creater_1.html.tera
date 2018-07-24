@@ -118,7 +118,7 @@
                 <h3 class="display-4">{{ i.title }}</h3>
                 <pre><p class="lead">{{ i.body }}</p></pre>
                 <p class="lead">
-                    <img src="{{ i.img_url_1 }}" alt="">
+                    <img style="width: 600px" src="{{ i.img_url_1 }}" alt="">
                 </p>
             </div>
     {% endfor %}
@@ -127,4 +127,3 @@
 </div>
 {% endblock content %}
 
-{% block profile %}{% endblock profile %}
