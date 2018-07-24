@@ -54,9 +54,9 @@
                 '<div class="jumbotron">' +
                 '<fieldset>' +
                 '<h3 class="display-4">' +
-                '<input type="text" name="title" id="title">' +
+                '<input type="text" name="title" id="title" style="width: 600px">' +
                 '</h3>' +
-                '<textarea class="lead" name="body" id="body"></textarea>' +
+                '<textarea class="lead" name="body" id="body" rows="10" style="width: 600px"></textarea>' +
                 '</div>'+
 
                 '<input name="file" type="file" accept="image/*">' +

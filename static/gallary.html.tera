@@ -5,20 +5,15 @@
             <tbody>
                 <tr class="table-active">
                     <!--1ブロック分-->
+                    {% for img in post_img %}
                     <td>
-
-                            <a href="">
-                                <img style="height: 200px; width: 100%; display: block;" src="./dist/picture/ducati01.png" alt="Card image">
+                            <a href="/creater/account/{{ img.account }}">
+                                <img style="height: 200px; width: 100%; display: block;" src="{{ img.img_url_1 }}" alt="Card image">
                             </a>
                             <!--特に名前などは追加せず、画像にアンカータグをつける-->
                     </td>
                     <!--1ブロック分-->
-                    <td>
-                            <img style="height: 200px; width: 100%; display: block;" src="./dist/picture/ducati01.png" alt="Card image">
-                    </td>
-                    <td>
-                            <img style="height: 200px; width: 100%; display: block;" src="./dist/picture/ducati01.png" alt="Card image">
-                    </td>
+                    {% endfor %}
                 </tr>
             </tbody>
         </table>

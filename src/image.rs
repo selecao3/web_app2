@@ -171,7 +171,7 @@ use diesel::prelude::*;
 fn insert(postimgform:PostImgForm, conn: &PgConnection) -> bool{
     let t = PostImg{
         id: None,
-        account: "rot".to_string(),
+        account: "root".to_string(),
         title:postimgform.title,
         body: postimgform.body,
         img_url_1: postimgform.img_url_1,
@@ -185,6 +185,13 @@ pub fn read_post_img(connection: &PgConnection) -> Vec<PostImg> {
     all_post_img
         .filter(post_img::account.eq("root"))
         //accountが◯◯のものを取り出す
+        .order(post_img::id.desc())
+        .load::<PostImg>(connection)
+        .expect("error")
+}
+pub fn read_gallary(connection: &PgConnection) -> Vec<PostImg> {
+    //postsテーブルからデータを読み取る。
+    all_post_img
         .order(post_img::id.desc())
         .load::<PostImg>(connection)
         .expect("error")

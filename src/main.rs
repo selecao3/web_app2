@@ -9,9 +9,11 @@ extern crate multipart;
 extern crate formdata;
 #[macro_use] extern crate diesel;
 extern crate regex;
+extern crate bcrypt;
 
 
 use image::static_rocket_route_info_for_multipart_upload;
+use signin::static_rocket_route_info_for_signup_post;
 
 use rocket::http::RawStr;
 use rocket::response::Redirect;
@@ -22,6 +24,7 @@ use diesel::pg::PgConnection;
 
 mod image;
 mod db;
+mod signin;
 
 
 #[derive(Serialize)]
@@ -50,23 +53,8 @@ fn news() -> Template{
     Template::render("news", &context)
 }*/
 
-#[get("/creater", rank = 2)]              // <- route attribute
-fn creater() -> Template{  // <- request handler
-    let context = TemplateRenderTest{
-        name: "name".to_string()
-        //nameという文字列がHome.html.teraの{{name}}に渡される
-    };
-    Template::render("creaters", &context)
-}
 
-#[get("/images")]              // <- route attribute
-fn images() -> Template {  // <- request handler
-    let context = TemplateRenderTest{
-        name: "name".to_string()
-        //nameという文字列がHome.html.teraの{{name}}に渡される
-    };
-    Template::render("gallary", &context)
-}
+
 #[get("/about_me")]              // <- route attribute
 fn about_me() -> Template {  // <- request handler
     let context = TemplateRenderTest{
@@ -119,11 +107,6 @@ fn redirect_admin() -> Redirect {
 use rocket::http::{Cookie, Cookies};
 use rocket::request::Form;
 
-#[derive(FromForm)]
-struct Profile{
-    profile: String,
-    //個人ページの自己紹介
-}
 
 #[derive(Serialize)]
 struct TemplateRenderTest02{
@@ -134,14 +117,6 @@ struct TemplateRenderTest02{
 }
 //postメソッド群
 //postアトリビュートのurlは、formのURIに対応している。
-#[post("/post/contribute", data = "<profile_form>")]
-fn contribute(profile_form: Form<Profile>) -> Template{
-    let profile = TemplateRenderTest02{
-        text: profile_form.into_inner().profile
-    };
-    Template::render("profile_text_template", profile)
-    //テキストエリアでpostされた文章を返す関数
-}
 
 
 /*#[post("/post/sign_in", data = "<sign_in>")]
@@ -242,6 +217,16 @@ mod schema {
         regulation -> Bool,
     }
 }
+    table! {
+    profile (id) {
+        id -> Nullable<Int4>,
+        name -> Varchar,
+        account -> Varchar,
+        profile_text -> Text,
+        profile_img -> Text,
+        regulation -> Bool,
+    }
+}
 }
 /*    table! {
     posts (id) {
@@ -255,10 +240,10 @@ mod schema {
 }*/
 
 
-use self::schema::posts;
-use self::schema::posts::dsl::{posts as all_posts, regulation as post_regulation};
+/*use self::schema::posts;
+use self::schema::posts::dsl::{posts as all_posts, regulation as post_regulation};*/
 
-#[derive(Serialize, Queryable, Debug,Clone,Insertable)]
+/*#[derive(Serialize, Queryable, Debug,Clone,Insertable)]
 #[table_name = "posts"]
 struct Post {
     id: Option<i32>,
@@ -272,14 +257,6 @@ struct Post {
     regulation: bool
 }
 
-/*#[derive(Serialize, Queryable, Debug,Clone,Insertable)]
-#[table_name = "gallarys"]
-struct Gallary{
-    img_url: String,
-    user_url: String,
-    regulation: bool
-}*/
-
 #[derive(FromForm)]
 struct PostForm{
     title: String,
@@ -289,15 +266,15 @@ struct PostForm{
     img_url_3: Option<String>,
     img_url_4: Option<String>,
     regulation: bool,
-    /*    regulation: bool,*/
+    *//*    regulation: bool,*//*
 }
 #[derive(FromForm)]
 struct GallaryForm{
     img_url: String,
     user_url: String,
     regulation: bool
-    /*    regulation: bool,*/
-}
+    *//*    regulation: bool,*//*
+}*/
 /*
 #[derive(Serialize, Queryable, Debug,Clone)]
 #[table_name = "user"]
@@ -312,11 +289,14 @@ struct User{
 
 #[derive(Debug,Serialize)]
 struct Context{
-    post: Vec<Post>,
     post_img: Vec<image::PostImg>
 }
+/*#[derive(Debug,Serialize)]
+struct ContextGallary{
+    post_img: Vec<image::PostImg>
+}*/
 
-fn read(connection: &PgConnection) -> Vec<Post> {
+/*fn read(connection: &PgConnection) -> Vec<Post> {
     //postsテーブルからデータを読み取る。
     all_posts
         .order(posts::id.desc())
@@ -337,19 +317,19 @@ fn insert(postform:PostForm, conn: &PgConnection) -> bool{
         //保存したimg_urlをどうにかしてPost structへ・・・
         regulation: false
     };
-    /*    println!("insert method");
+    *//*    println!("insert method");
         println!("{}&{}",t.title,t.body);
 
         let a = diesel::insert_into(posts::table).values(&t).execute(conn).unwrap();
 
         //上の一行をコメントアウトすると一度のPOSTで二つ同じものをinsertすることになる（バグ）
 
-        println!("{:?}",a);*/
+        println!("{:?}",a);*//*
     diesel::insert_into(posts::table).values(&t).execute(conn).is_ok()
-}
+}*/
 use rocket::response::Flash;
 
-#[post("/form_hoge", data = "<toukou_form>")]
+/*#[post("/form_hoge", data = "<toukou_form>")]
 fn new(toukou_form: Form<PostForm>, connection: db::Connection) -> Flash<Redirect>{
     let t = toukou_form.into_inner();
 
@@ -362,7 +342,7 @@ fn new(toukou_form: Form<PostForm>, connection: db::Connection) -> Flash<Redirec
         println!("失敗");
         Flash::error(Redirect::to("/creater/account"), "失敗した。")
     }
-}
+}*/
 
 
 /*#[post("/form", data = "<toukou>")]
@@ -395,29 +375,6 @@ extern crate rocket_static_fs;
 
 use rocket::http::hyper::header::Headers;
 
-#[post("/upload", data = "<data>")]
-fn upload(data: Data) -> io::Result<Redirect> {
-    /*    println!("upload function");
-        let mut body:Vec<u8> = vec![];
-        //let path = env::temp_dir().join("upload");
-
-        let aaa = data.stream_to(&mut body).unwrap() as usize;
-
-        let mut f = File::create("static/post_image/hoge.jpg").unwrap();
-        f.write_all(&body);*/
-    let headers = Headers::new();
-    let form_data = formdata::read_formdata(&mut data.open(),&headers).unwrap();
-    println!("失敗");
-
-    for (name, value) in form_data.fields  {
-        println!("Posted field name={} value={}", name, value);
-    }
-    for (name, file) in form_data.files {
-        println!("Posted file name={} path={:?}", name, file.path);
-    }
-
-    Ok(Redirect::to("/"))
-}
 
 #[get("/<path..>", rank = 6)]
 //creater/hogehogeにstaticディレクトリを適用する
@@ -429,8 +386,12 @@ fn files(path: PathBuf) -> Option<NamedFile> {
 impl Context{
     fn row(connection: &db::Connection) -> Context{
         Context{
-            post: read(connection),
             post_img: image::read_post_img(connection)
+        }
+    }
+    fn row_gallary(connection: &db::Connection) -> Context{
+        Context{
+            post_img: image::read_gallary(connection)
         }
     }
 }
@@ -446,17 +407,80 @@ fn hoge(connection: db::Connection) -> Template {
     println!("get中");
     Template::render("creater_1", Context::row(&connection))
 }
-//databases
+
+#[get("/images")]              // <- route attribute
+fn images(connection: db::Connection) -> Template {  // <- request handler
+    Template::render("gallary", Context::row_gallary(&connection))
+}
+
+/*#[get("/creater/<account>")]              // <- route attribute
+fn creater(account: User, connection: db::Connection) -> Template {  // <- request handler
+    Template::render("creater_1", Context::row(&connection))
+}*/
+
+#[get("/creater")]              // <- route attribute
+fn creater(connection: db::Connection) -> Template {  // <- request handler
+    Template::render("creaters", Context::row_gallary(&connection))
+}
 
 
+
+
+
+
+
+use self::schema::profile;
+use self::schema::profile::dsl::{profile as all_profile , regulation as profile_regulation};
+
+#[derive(Serialize, Queryable, Debug,Clone,Insertable)]
+#[table_name = "profile"]
+struct Profile{
+    id: Option<i32>,
+    name: String,
+    account: String,
+    profile_text: String,
+    profile_img : String,
+    regulation: bool
+}
+
+#[derive(FromForm)]
+struct ProfileForm{
+    name: String,
+    account: String,
+    profile: String,
+    profile_img: String,
+    /*    regulation: bool,*/
+}
+
+//profile郡
+#[derive(Debug,Serialize)]
+struct ProfileContext{
+    profile: Vec<Profile>
+}
+
+impl ProfileContext{
+    fn row(connection: &db::Connection) -> ProfileContext{
+        ProfileContext{
+            profile: read_profile(connection)
+        }
+    }
+}
+fn read_profile(connection: &PgConnection) -> Vec<Profile> {
+    //postsテーブルからデータを読み取る。
+    all_profile
+        //accountが◯◯のものを取り出す
+        .order(profile::id.desc())
+        .load::<Profile>(connection)
+        .expect("error")
+}
 
 fn main() {
     rocket::ignite()
         .mount("/", routes![
-home,creater,images,about_me,signup,login,
-all,creater_static,hoge,files
+home,images,about_me,signup,login,signup_post,
+all,creater_static,hoge,files,creater
 ])
-        .mount("/creater/account/post/", routes![new,upload,multipart_upload])
+        .mount("/creater/account/post/", routes![multipart_upload])
         .manage(db::connect())
         .attach(Template::fairing())
 

@@ -13,46 +13,24 @@
             <tbody>
                 <tr class="table-active">
                     <!--1ブロック分-->
+                    {% for tmp in profile%}
                     <td style="width: 360px">
                         <div class="card border-primary" style="max-width: 20rem; margin: 0 auto;">
-                            <h4 class="card-header">抹茶</h4>
+                            <h4 class="card-header">{{ tmp.account }}</h4>
     
-                            <img style="height: 200px; width: 100%; display: block;" src="./dist/picture/ducati01.png" alt="Card image">
+                            <img style="height: 200px; width: 100%; display: block;" src="{{ tmp.img_url_1 }}" alt="Card image">
                             <div class="card-body text-primary">
-                                <p class="card-text">絵描き初心者です。
-                                    <br>よろしくお願いします!!
+                                <p class="card-text">
+                                    {{ tmp.body }}
                                 </p>
                                 <a href="/creater/account">
-                                    <button type="button" class="btn btn-primary">抹茶さんのページへ</button>
+                                    <button type="button" class="btn btn-primary">{{ tmp.account }}さんのページへ</button>
                                 </a>
                             </div>
                         </div>
                     </td>
+                    {% endfor %}
                     <!--1ブロック分-->
-                    <td style="width: 360px">
-                        <div class="card border-primary" style="max-width: 20rem; margin: 0 auto;">
-                            <h4 class="card-header">抹茶</h4>
-                            <img style="height: 200px; width: 100%; display: block;" src="./dist/picture/ducati01.png" alt="Card image">
-                            <div class="card-body text-primary">
-                                <p class="card-text">絵描き初心者です。
-                                    <br>よろしくお願いします!!
-                                </p>
-                                <button type="button" class="btn btn-primary">抹茶さんのページへ</button>
-                            </div>
-                        </div>
-                    </td>
-                    <td style="width: 360px">
-                        <div class="card border-primary" style="max-width: 20rem; margin: 0 auto;">
-                            <h4 class="card-header">抹茶</h4>
-                            <img style="height: 200px; width: 100%; display: block;" src="./dist/picture/ducati01.png" alt="Card image">
-                            <div class="card-body text-primary">
-                                <p class="card-text">絵描き初心者です。
-                                    <br>よろしくお願いします!!
-                                </p>
-                                <button type="button" class="btn btn-primary">抹茶さんのページへ</button>
-                            </div>
-                        </div>
-                    </td>
                 </tr>
             </tbody>
         </table>
