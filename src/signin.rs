@@ -39,25 +39,28 @@ pub struct Signup{
     regulation: bool
 }
 
-#[derive(FromForm)]
+#[derive(FromForm, Clone)]
 struct SignupForm{
     account: String,
     mail_address: String,
     password: String,
 }
 
+use rocket::http::{Cookies,Cookie};
+use std::collections::HashMap;
 
 #[post("/hogehoge", data = "<user>")]
-fn signup_post(user: Form<SignupForm>, connection: db::Connection) -> Flash<Redirect>{
+fn signup_post(mut cookies: Cookies, user: Form<SignupForm>, connection: db::Connection) -> Flash<Redirect>{
     let t = user.into_inner();
+    cookies.add(Cookie::new("account",t.clone().account));
 
     println!("post");
     if insert(t,&connection) {
         println!("成功");
-        Flash::success(Redirect::to("/creater/account"), "成功してる")
+
+        Flash::success(Redirect::to("/"), "成功してる")
     } else {
-        println!("失敗");
-        Flash::error(Redirect::to("/creater/account"), "失敗した。")
+        Flash::error(Redirect::to("/"), "失敗した。")
     }
 }
 
