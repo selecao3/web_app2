@@ -423,8 +423,10 @@ fn creater(connection: db::Connection) -> Template {  // <- request handler
     Template::render("creaters", Context::row_gallary(&connection))
 }
 
-
-
+#[get("/user/<account>")]              // <- route attribute
+fn creater(connection: db::Connection) -> Template {  // <- request handler
+    Template::render("creaters", Context::row_gallary(&connection))
+}
 
 
 

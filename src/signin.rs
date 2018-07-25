@@ -52,7 +52,7 @@ use std::collections::HashMap;
 #[post("/hogehoge", data = "<user>")]
 fn signup_post(mut cookies: Cookies, user: Form<SignupForm>, connection: db::Connection) -> Flash<Redirect>{
     let t = user.into_inner();
-    cookies.add(Cookie::new("account",t.clone().account));
+    let c = cookies.add(Cookie::new("account",t.clone().account));
 
     println!("post");
     if insert(t,&connection) {
