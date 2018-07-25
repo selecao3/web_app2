@@ -1,6 +1,5 @@
 use multipart::server::Multipart;
 
-
 use multipart::server::save::Entries;
 
 use multipart::server::save::SaveResult::*;
@@ -17,7 +16,7 @@ use std::env;
 use regex::Regex;
 
 
-mod schema {
+pub mod schema {
     table! {
     post_img (id) {
         id -> Nullable<Int4>,
@@ -168,6 +167,11 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection) -> 
 use diesel::pg::PgConnection;
 use diesel;
 use diesel::prelude::*;
+
+use rocket::http::Cookies;
+use rocket::http::Cookie;
+
+
 fn insert(postimgform:PostImgForm, conn: &PgConnection) -> bool{
     let t = PostImg{
         id: None,
@@ -180,10 +184,10 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection) -> bool{
     };
     diesel::insert_into(post_img::table).values(&t).execute(conn).is_ok()
 }
-pub fn read_post_img(connection: &PgConnection) -> Vec<PostImg> {
+pub fn read_post_img(connection: &PgConnection, cookies:Cookies) -> Vec<PostImg> {
     //postsテーブルからデータを読み取る。
     all_post_img
-        .filter(post_img::account.eq("root"))
+        .filter(post_img::account.eq(cookies.get("account").map(|c| c.value()).unwrap()))
         //accountが◯◯のものを取り出す
         .order(post_img::id.desc())
         .load::<PostImg>(connection)

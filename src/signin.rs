@@ -13,7 +13,7 @@ use std::env;
 use db;
 
 
-mod schema {
+pub mod schema {
     table! {
     creater (id) {
         id -> Nullable<Int4>,
@@ -49,18 +49,18 @@ struct SignupForm{
 use rocket::http::{Cookies,Cookie};
 use std::collections::HashMap;
 
-#[post("/hogehoge", data = "<user>")]
+#[post("/creater/profile", data = "<user>")]
+//signup.html.teraからわたされたSignup structをDBへ取り込み、なおかつaccountの値をcookieに追加して、creater_setting.html.teraへリダイレクトする
 fn signup_post(mut cookies: Cookies, user: Form<SignupForm>, connection: db::Connection) -> Flash<Redirect>{
     let t = user.into_inner();
-    let c = cookies.add(Cookie::new("account",t.clone().account));
 
     println!("post");
     if insert(t,&connection) {
         println!("成功");
-
-        Flash::success(Redirect::to("/"), "成功してる")
+        cookies.add(Cookie::new("account",t.clone().account));
+        Flash::success(Redirect::to("/creater/account/new"), "成功してる")
     } else {
-        Flash::error(Redirect::to("/"), "失敗した。")
+        Flash::error(Redirect::to("/signup"), "失敗した。")
     }
 }
 

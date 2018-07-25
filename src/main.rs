@@ -25,6 +25,7 @@ use diesel::pg::PgConnection;
 mod image;
 mod db;
 mod signin;
+mod user_profile;
 
 
 #[derive(Serialize)]
@@ -66,11 +67,7 @@ fn about_me() -> Template {  // <- request handler
 
 #[get("/signup")]              // <- route attribute
 fn signup() -> Template {  // <- request handler
-    let context = TemplateRenderTest{
-        name: "name".to_string()
-        //nameという文字列がHome.html.teraの{{name}}に渡される
-    };
-    Template::render("sign_up", &context)
+    Template::render("sign_up", _null)
 }
 #[get("/login")]              // <- route attribute
 fn login() -> Template {  // <- request handler
@@ -384,9 +381,9 @@ fn files(path: PathBuf) -> Option<NamedFile> {
 
 
 impl Context{
-    fn row(connection: &db::Connection) -> Context{
+    fn row(connection: &db::Connection, cookies:Cookies) -> Context{
         Context{
-            post_img: image::read_post_img(connection)
+            post_img: image::read_post_img(connection, cookies)
         }
     }
     fn row_gallary(connection: &db::Connection) -> Context{
@@ -402,10 +399,10 @@ impl Context{
 //}
 
 
-#[get("/creater/account")]
-fn hoge(connection: db::Connection) -> Template {
-    println!("get中");
-    Template::render("creater_1", Context::row(&connection))
+
+#[get("/creater/account/new")]
+fn user_setting(connection: db::Connection, cookies:Cookies) -> Template {
+    Template::render("profile_left", Context::row(&connection, cookies))
 }
 
 #[get("/images")]              // <- route attribute
@@ -423,10 +420,6 @@ fn creater(connection: db::Connection) -> Template {  // <- request handler
     Template::render("creaters", Context::row_gallary(&connection))
 }
 
-#[get("/user/<account>")]              // <- route attribute
-fn creater(connection: db::Connection) -> Template {  // <- request handler
-    Template::render("creaters", Context::row_gallary(&connection))
-}
 
 
 
@@ -445,7 +438,7 @@ struct Profile{
     regulation: bool
 }
 
-#[derive(FromForm)]
+#[derive(FromForm,Clone)]
 struct ProfileForm{
     name: String,
     account: String,
@@ -461,26 +454,54 @@ struct ProfileContext{
 }
 
 impl ProfileContext{
-    fn row(connection: &db::Connection) -> ProfileContext{
+    fn row(connection: &db::Connection, cookies:Cookies) -> ProfileContext{
         ProfileContext{
-            profile: read_profile(connection)
+            profile: read_profile(connection, cookies)
         }
     }
 }
-fn read_profile(connection: &PgConnection) -> Vec<Profile> {
+fn read_profile(connection: &PgConnection, cookies: Cookies) -> Vec<Profile> {
     //postsテーブルからデータを読み取る。
     all_profile
         //accountが◯◯のものを取り出す
+        .filter(profile::account.eq(cookies.get("account").map(|c| c.value()).unwrap()))
         .order(profile::id.desc())
         .load::<Profile>(connection)
         .expect("error")
 }
+#[post("/creater/new/profile", data = "<user>")]
+//signup.html.teraの処理
+fn signup_post(mut cookies:Cookies ,user: Form<ProfileForm>, connection: db::Connection) -> Flash<Redirect>{
+    let t = user.into_inner();
+
+    println!("post");
+    if insert(t,&connection) {
+        cookies.add(Cookie::new("account",t.clone().account));
+        println!("成功");
+        Flash::success(Redirect::to("/creater/account/new"), "成功してる")
+        //次にcreaterの個人ページの編集画面へ
+    } else {
+        Flash::error(Redirect::to("/signup"), "失敗した。")
+    }
+}
+fn insert(profileform:ProfileForm,conn: &PgConnection) -> bool{
+    let t = Profile{
+        id: None,
+        name: profileform.name,
+        account:profileform.account,
+        profile_text: profileform.profile,
+        profile_img : profileform.profile_img,
+        regulation: bool
+    };
+    diesel::insert_into(post_img::table).values(&t).execute(conn).is_ok()
+}
+
 
 fn main() {
     rocket::ignite()
         .mount("/", routes![
 home,images,about_me,signup,login,signup_post,
-all,creater_static,hoge,files,creater
+all,creater_static,files,creater,user
 ])
         .mount("/creater/account/post/", routes![multipart_upload])
         .manage(db::connect())
