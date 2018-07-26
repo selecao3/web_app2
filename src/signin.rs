@@ -53,14 +53,16 @@ use std::collections::HashMap;
 //signup.html.teraからわたされたSignup structをDBへ取り込み、なおかつaccountの値をcookieに追加して、creater_setting.html.teraへリダイレクトする
 fn signup_post(mut cookies: Cookies, user: Form<SignupForm>, connection: db::Connection) -> Flash<Redirect>{
     let t = user.into_inner();
+    let t_clone = t.clone();
 
     println!("post");
-    if insert(t,&connection) {
+    if insert(t_clone,&connection) {
         println!("成功");
         cookies.add(Cookie::new("account",t.clone().account));
         Flash::success(Redirect::to("/creater/account/new"), "成功してる")
+        //creater編集画面へ
     } else {
-        Flash::error(Redirect::to("/signup"), "失敗した。")
+        Flash::error(Redirect::to("/"), "失敗した。")
     }
 }
 

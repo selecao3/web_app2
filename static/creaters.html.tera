@@ -16,15 +16,15 @@
                     {% for tmp in profile%}
                     <td style="width: 360px">
                         <div class="card border-primary" style="max-width: 20rem; margin: 0 auto;">
-                            <h4 class="card-header">{{ tmp.account }}</h4>
+                            <h4 class="card-header">{{ tmp.name }}</h4>
     
-                            <img style="height: 200px; width: 100%; display: block;" src="{{ tmp.img_url_1 }}" alt="Card image">
+                            <img style="height: 200px; width: 100%; display: block;" src="{{ tmp.profile_img}}" alt="Card image">
                             <div class="card-body text-primary">
                                 <p class="card-text">
-                                    {{ tmp.body }}
+                                    {{ tmp.profile_text}}
                                 </p>
                                 <a href="/creater/account">
-                                    <button type="button" class="btn btn-primary">{{ tmp.account }}さんのページへ</button>
+                                    <button type="button" class="btn btn-primary">{{ tmp.name}}さんのページへ</button>
                                 </a>
                             </div>
                         </div>

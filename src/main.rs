@@ -14,6 +14,7 @@ extern crate bcrypt;
 
 use image::static_rocket_route_info_for_multipart_upload;
 use signin::static_rocket_route_info_for_signup_post;
+use creater_setting::static_rocket_route_info_for_multipart_user_setting;
 
 use rocket::http::RawStr;
 use rocket::response::Redirect;
@@ -25,7 +26,7 @@ use diesel::pg::PgConnection;
 mod image;
 mod db;
 mod signin;
-mod user_profile;
+mod creater_setting;
 
 
 #[derive(Serialize)]
@@ -67,7 +68,11 @@ fn about_me() -> Template {  // <- request handler
 
 #[get("/signup")]              // <- route attribute
 fn signup() -> Template {  // <- request handler
-    Template::render("sign_up", _null)
+    let context = TemplateRenderTest{
+        name: "name".to_string()
+        //nameという文字列がHome.html.teraの{{name}}に渡される
+    };
+    Template::render("sign_up", &context)
 }
 #[get("/login")]              // <- route attribute
 fn login() -> Template {  // <- request handler
@@ -84,16 +89,13 @@ use rocket::request::FromForm;
 
 /*#[get("/creater/<user>", rank = 2)]              // <- route attribute
 fn admin(user: &RawStr) -> String {  // <- request handler
-    format!("{}の個人ページ", user.as_str())
-}*/
-/*#[get("/creater/account")]              // <- route attribute
-fn user() -> Template {  // <- request handler
-   let context = TemplateRenderTest02{
-        text: "hogehoge".to_string()
-        //nameという文字列がHome.html.teraの{{name}}に渡される
-    };
-    Template::render("creater_1", &context)
-}*/
+    format!("{}の個人ページ", user.as_str())*/
+
+#[get("/creater/account")]              // <- route attribute
+fn user(connection: db::Connection, cookies:Cookies) -> Template {  // <- request handler
+    Template::render("profile_left",ProfileContext::row(&connection, cookies))
+}
+
 /*#[get("/creater/account", rank = 3)]
 fn redirect_admin() -> Redirect {
     Redirect::to("/login")
@@ -134,13 +136,18 @@ fn logout(logout: Form<Profile>) -> String{
 use std::path::{Path, PathBuf};
 use rocket::response::NamedFile;
 
-#[get("/<path..>", rank = 5)]
+#[get("/<path..>", rank = 6)]
 fn all(path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("static/").join(path)).ok()
 }
-#[get("/creater/<path..>", rank = 4)]
+#[get("/creater/<path..>", rank = 5)]
 //creater/hogehogeにstaticディレクトリを適用する
 fn creater_static(path: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("static/").join(path)).ok()
+}
+#[get("/creater/account/<path..>", rank = 4)]
+//creater/hogehogeにstaticディレクトリを適用する
+fn profile_static(path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("static/").join(path)).ok()
 }
 //staticファイルを伝えるメソッド終わり
@@ -373,7 +380,7 @@ extern crate rocket_static_fs;
 use rocket::http::hyper::header::Headers;
 
 
-#[get("/<path..>", rank = 6)]
+#[get("/<path..>", rank = 7)]
 //creater/hogehogeにstaticディレクトリを適用する
 fn files(path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("static/post_image").join(path)).ok()
@@ -402,7 +409,7 @@ impl Context{
 
 #[get("/creater/account/new")]
 fn user_setting(connection: db::Connection, cookies:Cookies) -> Template {
-    Template::render("profile_left", Context::row(&connection, cookies))
+    Template::render("creater_setting", Context::row(&connection, cookies))
 }
 
 #[get("/images")]              // <- route attribute
@@ -416,18 +423,18 @@ fn creater(account: User, connection: db::Connection) -> Template {  // <- reque
 }*/
 
 #[get("/creater")]              // <- route attribute
-fn creater(connection: db::Connection) -> Template {  // <- request handler
-    Template::render("creaters", Context::row_gallary(&connection))
+fn creater(connection: db::Connection, cookies:Cookies) -> Template {  // <- request handler
+    Template::render("creaters", ProfileContext::row(&connection, cookies))
 }
 
 
 
 
 
-use self::schema::profile;
-use self::schema::profile::dsl::{profile as all_profile , regulation as profile_regulation};
+/*use self::schema::profile;
+use self::schema::profile::dsl::{profile as all_profile , regulation as profile_regulation};*/
 
-#[derive(Serialize, Queryable, Debug,Clone,Insertable)]
+/*#[derive(Serialize, Queryable, Debug,Clone,Insertable)]
 #[table_name = "profile"]
 struct Profile{
     id: Option<i32>,
@@ -441,67 +448,57 @@ struct Profile{
 #[derive(FromForm,Clone)]
 struct ProfileForm{
     name: String,
-    account: String,
-    profile: String,
+    profile_text: String,
     profile_img: String,
-    /*    regulation: bool,*/
-}
+    *//*    regulation: bool,*//*
+}*/
 
 //profile郡
 #[derive(Debug,Serialize)]
 struct ProfileContext{
-    profile: Vec<Profile>
+    profile: Vec<creater_setting::Profile>
 }
 
 impl ProfileContext{
     fn row(connection: &db::Connection, cookies:Cookies) -> ProfileContext{
         ProfileContext{
-            profile: read_profile(connection, cookies)
+            profile:creater_setting::read_profile(&connection, cookies)
         }
     }
 }
-fn read_profile(connection: &PgConnection, cookies: Cookies) -> Vec<Profile> {
-    //postsテーブルからデータを読み取る。
-    all_profile
-        //accountが◯◯のものを取り出す
-        .filter(profile::account.eq(cookies.get("account").map(|c| c.value()).unwrap()))
-        .order(profile::id.desc())
-        .load::<Profile>(connection)
-        .expect("error")
-}
-#[post("/creater/new/profile", data = "<user>")]
+
+/*#[post("/creater/account/new/profile", data = "<user>")]
 //signup.html.teraの処理
-fn signup_post(mut cookies:Cookies ,user: Form<ProfileForm>, connection: db::Connection) -> Flash<Redirect>{
+fn profile_post(mut cookies:Cookies ,user: Form<ProfileForm>, connection: db::Connection) -> Flash<Redirect>{
     let t = user.into_inner();
 
     println!("post");
-    if insert(t,&connection) {
-        cookies.add(Cookie::new("account",t.clone().account));
+    if (t,&connection, cookies) {
         println!("成功");
-        Flash::success(Redirect::to("/creater/account/new"), "成功してる")
-        //次にcreaterの個人ページの編集画面へ
+        Flash::success(Redirect::to("/creater/account"), "成功してる")
+        //次にcreaterの個人ページへ
     } else {
         Flash::error(Redirect::to("/signup"), "失敗した。")
     }
 }
-fn insert(profileform:ProfileForm,conn: &PgConnection) -> bool{
+fn insert(profileform:ProfileForm,conn: &PgConnection, cookies:Cookies) -> bool{
     let t = Profile{
         id: None,
         name: profileform.name,
-        account:profileform.account,
+        account:cookies.get("account").map(|c| c.value()).unwrap().to_string(),
         profile_text: profileform.profile,
         profile_img : profileform.profile_img,
-        regulation: bool
+        regulation:false
     };
-    diesel::insert_into(post_img::table).values(&t).execute(conn).is_ok()
-}
+    diesel::insert_into(profile::table).values(&t).execute(conn).is_ok()
+}*/
 
 
 fn main() {
     rocket::ignite()
         .mount("/", routes![
-home,images,about_me,signup,login,signup_post,
-all,creater_static,files,creater,user
+home,images,about_me,signup,login,signup_post,multipart_user_setting,
+all,creater_static,files,creater,user_setting,profile_static,user
 ])
         .mount("/creater/account/post/", routes![multipart_upload])
         .manage(db::connect())

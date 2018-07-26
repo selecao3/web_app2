@@ -2,7 +2,7 @@
 {% block content %}
 
     <!--1ブロック分-->
-<form action="/hogehoge" method="post" >
+<form action="/creater/profile" method="post" >
     <div class="form-group">
         <label for="account">Your account</label>
         <input type="text" name="account" class="form-control" id="InputName" placeholder="Enter your account">

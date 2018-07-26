@@ -16,15 +16,29 @@ use std::env;
 
 use regex::Regex;
 
+mod schema{
+    table! {
+    profile (id) {
+        id -> Nullable<Int4>,
+        name -> Varchar,
+        account -> Varchar,
+        profile_text -> Text,
+        profile_img -> Text,
+        regulation -> Bool,
+    }
+}
+}
+
 
 use self::schema::profile;
 use self::schema::profile::dsl::{profile as all_profile , regulation as profile_regulation};
 
 #[derive(Serialize, Queryable, Debug,Clone,Insertable)]
 #[table_name = "profile"]
-struct Profile{
+pub struct Profile{
     id: Option<i32>,
     name: String,
+    account: String,
     profile_text: String,
     profile_img : String,
     regulation: bool
@@ -33,7 +47,7 @@ struct Profile{
 #[derive(FromForm)]
 struct ProfileForm{
     name: String,
-    profile: String,
+    profile_text: String,
     profile_img: String,
     /*    regulation: bool,*/
 }
@@ -43,7 +57,7 @@ use rocket::http::Cookies;
 
 #[post("/user/setting", data = "<data>")]
 // signature requires the request to have a `Content-Type`
-fn multipart_user_setting(cont_type: &ContentType, data: Data, conn:Connection) -> Result<Stream<Cursor<Vec<u8>>>, Custom<String>> {
+fn multipart_user_setting(cont_type: &ContentType, data: Data, conn:Connection, cookies:Cookies) -> Result<Stream<Cursor<Vec<u8>>>, Custom<String>> {
     // this and the next check can be implemented as a request guard but it seems like just
     // more boilerplate than necessary
 
@@ -55,22 +69,22 @@ fn multipart_user_setting(cont_type: &ContentType, data: Data, conn:Connection) 
     )?;
     //boundaryの取得
 
-    match process_upload(boundary, data,conn) {
+    match process_upload(boundary, data,conn,cookies) {
         Ok(resp) => Ok(Stream::from(Cursor::new(resp))),
         Err(err) => Err(Custom(Status::InternalServerError, err.to_string()))
     }
 }
 
-fn process_upload(boundary: &str, data: Data, conn:Connection) -> io::Result<Vec<u8>> {
+fn process_upload(boundary: &str, data: Data, conn:Connection,cookies:Cookies) -> io::Result<Vec<u8>> {
     let mut out = Vec::new();
     println!("process_upload関数");
 
     // saves all fields, any field longer than 10kB goes to a temporary directory
     // Entries could implement FromData though that would give zero control over
     // how the files are saved; Multipart would be a good impl candidate though
-    match Multipart::with_body(data.open(), boundary).save().size_limit(None).with_dir("static/post_image"){
+    match Multipart::with_body(data.open(), boundary).save().size_limit(None).with_dir("static/profile_imgs"){
         //全てのフィールドを一旦保存する
-        Full(entries) => process_entries(entries, &mut out, conn)?,
+        Full(entries) => process_entries(entries, &mut out, conn, cookies)?,
         //成功,entriesにはフィールドが全て詰まっている
         Partial(partial, reason) => {
             //途中で失敗した。
@@ -79,7 +93,7 @@ fn process_upload(boundary: &str, data: Data, conn:Connection) -> io::Result<Vec
                 writeln!(out, "Stopped on field: {:?}", field.source.headers)?;
             }
 
-            process_entries(partial.entries, &mut out, conn)?
+            process_entries(partial.entries, &mut out, conn,cookies)?
         },
         Error(e) => return Err(e),
     }
@@ -101,7 +115,7 @@ use std::fs::rename;
 use std::mem::replace;
 
 
-fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection) -> io::Result<()> {
+fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, cookies:Cookies) -> io::Result<()> {
     {
 
         /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
@@ -132,12 +146,12 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection) -> 
             println!("{}",profile_string);
             tmp.push(profile_string.to_string());
         }
-        let t = PostImgForm{
-            title:tmp[1].clone(),
-            body:tmp[2].clone(),
-            img_url_1:tmp[0].clone(),
+        let t = ProfileForm{
+            profile_img:tmp[0].clone(),
+            name:tmp[1].clone(),
+            profile_text:tmp[2].clone(),
         };
-        insert(t,&conn);
+        insert(t,&conn, cookies);
 
 
         /*        let hoge = entries.save_dir;
@@ -158,15 +172,27 @@ use diesel::prelude::*;
 
 
 
-fn insert(profile:ProfileForm, conn: &PgConnection) -> bool{
-    let coockies:Cookies;
+fn insert(profile:ProfileForm, conn: &PgConnection, cookies: Cookies) -> bool{
+    println!("insertメソッド");
     let t = Profile{
         id: None,
+        account:cookies.get("account").map(|c| c.value()).unwrap().to_string(),
         name:profile.name,
-        profile_text: profile.profile,
+        profile_text: profile.profile_text,
         profile_img: profile.profile_img,
         //保存したimg_urlをどうにかしてPost structへ・・・
         regulation: false
     };
     diesel::insert_into(profile::table).values(&t).execute(conn).is_ok()
 }
+
+pub fn read_profile(connection: &PgConnection, cookies: Cookies) -> Vec<Profile> {
+    //postsテーブルからデータを読み取る。
+    all_profile
+        //accountが◯◯のものを取り出す
+        .filter(profile::account.eq(cookies.get("account").map(|c| c.value()).unwrap()))
+        .order(profile::id.desc())
+        .load::<Profile>(connection)
+        .expect("error")
+}
+
