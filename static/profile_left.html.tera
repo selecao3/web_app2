@@ -1,7 +1,7 @@
 {% extends "Home" %}
 {% block content %}
     {% for i in profile%}
-        {{ loop.first}}
+        {{ loop.first }}
     <div class="card mb-3" style="width: 300px; display: inline-block">
         <h3 class="card-header">{{ i.name }}</h3>
         <div class="card-body">
@@ -31,4 +31,27 @@
             2 days ago
         </div>
     </div>
+
+
+<div class="col-lg-12" style="width: 750px; display: inline-block; position: absolute; padding-left: 60px;">
+    <div class="page-header">
+
+        <button type="button" class="btn btn-success" onclick="hoge();" style="margin-left: 500px;font-size: 24px">投稿する！</button>
+    </div>
+
+
+    {% for i in post_img %}
+
+        <div class="jumbotron">
+            <h3 class="display-4">{{ i.title }}</h3>
+            <pre><p class="lead">{{ i.body }}</p></pre>
+            <p class="lead">
+                <img style="width: 600px" src="{{ i.img_url_1 }}" alt="">
+            </p>
+        </div>
+    {% endfor %}
+
+
+</div>
+
 {% endblock content %}

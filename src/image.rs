@@ -184,10 +184,10 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection) -> bool{
     };
     diesel::insert_into(post_img::table).values(&t).execute(conn).is_ok()
 }
-pub fn read_post_img(connection: &PgConnection, cookies:Cookies) -> Vec<PostImg> {
+    pub fn read_post_img(connection: &PgConnection, cookies:Option<&Cookie>) -> Vec<PostImg> {
     //postsテーブルからデータを読み取る。
     all_post_img
-        .filter(post_img::account.eq(cookies.get("account").map(|c| c.value()).unwrap()))
+        .filter(post_img::account.eq(cookies.map(|c| c.value()).unwrap()))
         //accountが◯◯のものを取り出す
         .order(post_img::id.desc())
         .load::<PostImg>(connection)

@@ -1,6 +1,6 @@
 {% extends "Home" %}
 {% block content %}
-    <form action="/user/setting" method="post" enctype="multipart/form-data">
+    <form action="/creater/user/setting" method="post" enctype="multipart/form-data">
         <input type="text" name="name">
         <br>
         <textarea name="profile_text" id="profile_text" cols="30" rows="10">profile_text</textarea>

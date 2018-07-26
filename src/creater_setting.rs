@@ -16,6 +16,8 @@ use std::env;
 
 use regex::Regex;
 
+
+
 mod schema{
     table! {
     profile (id) {
@@ -55,7 +57,7 @@ struct ProfileForm{
 use rocket::http::Cookies;
 
 
-#[post("/user/setting", data = "<data>")]
+#[post("/creater/user/setting", data = "<data>")]
 // signature requires the request to have a `Content-Type`
 fn multipart_user_setting(cont_type: &ContentType, data: Data, conn:Connection, cookies:Cookies) -> Result<Stream<Cursor<Vec<u8>>>, Custom<String>> {
     // this and the next check can be implemented as a request guard but it seems like just
@@ -186,11 +188,13 @@ fn insert(profile:ProfileForm, conn: &PgConnection, cookies: Cookies) -> bool{
     diesel::insert_into(profile::table).values(&t).execute(conn).is_ok()
 }
 
-pub fn read_profile(connection: &PgConnection, cookies: Cookies) -> Vec<Profile> {
+use rocket::http::Cookie;
+
+pub fn read_profile(connection: &PgConnection, cookies: Option<&Cookie>) -> Vec<Profile> {
     //postsテーブルからデータを読み取る。
     all_profile
         //accountが◯◯のものを取り出す
-        .filter(profile::account.eq(cookies.get("account").map(|c| c.value()).unwrap()))
+        .filter(profile::account.eq(cookies.map(|c| c.value()).unwrap()))
         .order(profile::id.desc())
         .load::<Profile>(connection)
         .expect("error")

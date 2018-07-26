@@ -56,9 +56,9 @@ fn signup_post(mut cookies: Cookies, user: Form<SignupForm>, connection: db::Con
     let t_clone = t.clone();
 
     println!("post");
-    if insert(t_clone,&connection) {
+    if insert(t_clone,&connection, cookies) {
         println!("成功");
-        cookies.add(Cookie::new("account",t.clone().account));
+
         Flash::success(Redirect::to("/creater/account/new"), "成功してる")
         //creater編集画面へ
     } else {
@@ -70,7 +70,7 @@ fn signup_post(mut cookies: Cookies, user: Form<SignupForm>, connection: db::Con
 use diesel::pg::PgConnection;
 use diesel;
 use diesel::prelude::*;
-fn insert(signupform:SignupForm, conn: &PgConnection) -> bool{
+fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> bool{
     let t = Signup{
         id: None,
         account: signupform.account,
@@ -78,7 +78,11 @@ fn insert(signupform:SignupForm, conn: &PgConnection) -> bool{
         password: bcrypt::hash(signupform.password.trim(), bcrypt::DEFAULT_COST).unwrap(),
         regulation: false
     };
+    cookies.add(Cookie::new("account",t.clone().account));
     diesel::insert_into(creater::table).values(&t).execute(conn).is_ok()
+    //account or mail_addressがDB上で同じだとFalse
+
+
 }
 pub fn read_user(connection: &PgConnection) -> Vec<Signup> {
     //postsテーブルからデータを読み取る。

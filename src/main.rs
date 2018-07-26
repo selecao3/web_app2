@@ -93,7 +93,7 @@ fn admin(user: &RawStr) -> String {  // <- request handler
 
 #[get("/creater/account")]              // <- route attribute
 fn user(connection: db::Connection, cookies:Cookies) -> Template {  // <- request handler
-    Template::render("profile_left",ProfileContext::row(&connection, cookies))
+    Template::render("profile_left",Context::row(&connection, cookies))
 }
 
 /*#[get("/creater/account", rank = 3)]
@@ -103,7 +103,10 @@ fn redirect_admin() -> Redirect {
 //getメソッド群終わり
 
 
-use rocket::http::{Cookie, Cookies};
+
+use rocket::http::Cookies;
+
+use rocket::http::Cookie;
 use rocket::request::Form;
 
 
@@ -293,7 +296,8 @@ struct User{
 
 #[derive(Debug,Serialize)]
 struct Context{
-    post_img: Vec<image::PostImg>
+    post_img: Vec<image::PostImg>,
+    profile: Vec<creater_setting::Profile>
 }
 /*#[derive(Debug,Serialize)]
 struct ContextGallary{
@@ -387,17 +391,21 @@ fn files(path: PathBuf) -> Option<NamedFile> {
 }
 
 
+
 impl Context{
     fn row(connection: &db::Connection, cookies:Cookies) -> Context{
+        let aaa = cookies.get("account");
         Context{
-            post_img: image::read_post_img(connection, cookies)
+            post_img: image::read_post_img(connection, aaa.clone()),
+            profile:creater_setting::read_profile(&connection, aaa.clone())
         }
     }
-    fn row_gallary(connection: &db::Connection) -> Context{
-        Context{
-            post_img: image::read_gallary(connection)
-        }
-    }
+    /*    fn row_gallary(connection: &db::Connection) -> Context{
+            Context{
+                post_img: image::read_gallary(connection),
+                profile:creater_setting::read_profile(&connection, cookies)
+            }
+        }*/
 }
 
 
@@ -412,10 +420,15 @@ fn user_setting(connection: db::Connection, cookies:Cookies) -> Template {
     Template::render("creater_setting", Context::row(&connection, cookies))
 }
 
-#[get("/images")]              // <- route attribute
+
+/*#[get("/images")]              // <- route attribute
 fn images(connection: db::Connection) -> Template {  // <- request handler
     Template::render("gallary", Context::row_gallary(&connection))
-}
+}*/
+
+
+
+
 
 /*#[get("/creater/<account>")]              // <- route attribute
 fn creater(account: User, connection: db::Connection) -> Template {  // <- request handler
@@ -462,7 +475,7 @@ struct ProfileContext{
 impl ProfileContext{
     fn row(connection: &db::Connection, cookies:Cookies) -> ProfileContext{
         ProfileContext{
-            profile:creater_setting::read_profile(&connection, cookies)
+            profile:creater_setting::read_profile(&connection, cookies.get("account"))
         }
     }
 }
@@ -497,7 +510,7 @@ fn insert(profileform:ProfileForm,conn: &PgConnection, cookies:Cookies) -> bool{
 fn main() {
     rocket::ignite()
         .mount("/", routes![
-home,images,about_me,signup,login,signup_post,multipart_user_setting,
+home,about_me,signup,login,signup_post,multipart_user_setting,
 all,creater_static,files,creater,user_setting,profile_static,user
 ])
         .mount("/creater/account/post/", routes![multipart_upload])
