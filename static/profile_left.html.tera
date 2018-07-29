@@ -1,7 +1,6 @@
 {% extends "Home" %}
 {% block content %}
     {% for i in profile%}
-        {{ loop.first }}
     <div class="card mb-3" style="width: 300px; display: inline-block">
         <h3 class="card-header">{{ i.name }}</h3>
         <div class="card-body">
