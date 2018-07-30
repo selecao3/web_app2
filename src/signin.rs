@@ -26,8 +26,8 @@ pub mod schema {
 
 }
 
-use self::schema::creater;
-use self::schema::creater::dsl::{creater as all_creater};
+use schema::creater;
+use schema::creater::dsl::{creater as all_creater};
 
 #[derive(Serialize, Queryable, Debug,Clone,Insertable)]
 #[table_name = "creater"]

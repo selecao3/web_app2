@@ -27,6 +27,7 @@ mod image;
 mod db;
 mod signin;
 mod creater_setting;
+mod schema;
 
 
 #[derive(Serialize)]
@@ -45,16 +46,6 @@ fn home() -> Template{
     };
     Template::render("news", &context)
 }
-
-/*#[get("/")]
-fn news() -> Template{
-    let context = TemplateRenderTest{
-        name: "name".to_string()
-        //nameという文字列がHome.html.teraの{{name}}に渡される
-    };
-    Template::render("news", &context)
-}*/
-
 
 
 #[get("/about_me")]              // <- route attribute
@@ -87,19 +78,25 @@ fn login() -> Template {  // <- request handler
 
 use rocket::request::FromForm;
 
-/*#[get("/creater/<user>", rank = 2)]              // <- route attribute
-fn admin(user: &RawStr) -> String {  // <- request handler
-    format!("{}の個人ページ", user.as_str())*/
 
-#[get("/creater/account")]              // <- route attribute
+/*#[get("/creater/account")]              // <- route attribute
 fn user(connection: db::Connection, cookies:Cookies) -> Template {  // <- request handler
-    Template::render("profile_left",Context::row(&connection, cookies))
+    Template::render("profile",Context::row(&connection, cookies))
+}*/
+#[get("/creater/account/<account>")]              // <- route attribute
+fn user(connection: db::Connection, cookies:Cookies, account:String) -> Template {  // <- request handler
+    if cookies.get("account").unwrap().value() == account.as_str() {
+        return Template::render("profile",Context::row(&connection, cookies))
+    }else {
+        return Template::render("profile",Context::account_row(&connection, account))
+    }
+
+}
+#[get("/creater/account/news")]              // <- route attribute
+fn news(connection: db::Connection, cookies:Cookies) -> Template {  // <- request handler
+    Template::render("news_creater",Context::row(&connection, cookies))
 }
 
-/*#[get("/creater/account", rank = 3)]
-fn redirect_admin() -> Redirect {
-    Redirect::to("/login")
-}*/
 //getメソッド群終わり
 
 
@@ -110,29 +107,10 @@ use rocket::http::Cookie;
 use rocket::request::Form;
 
 
-#[derive(Serialize)]
-struct TemplateRenderTest02{
-    text: String,
-    //writting text in user's textarea.
-    //you can use in template.
-
-}
 //postメソッド群
 //postアトリビュートのurlは、formのURIに対応している。
 
 
-/*#[post("/post/sign_in", data = "<sign_in>")]
-fn signin(sign_in: Form<Profile>) -> String{
-}*/
-
-/*#[post("/post/sign_up", data = "<sign_up>")]
-fn regist(sign_up: Form<User>) -> String{
-
-}*/
-/*#[post("/post/logout", data = "<logout>")]
-fn logout(logout: Form<Profile>) -> String{
-
-}*/
 
 
 //staticファイルを伝えるメソッド
@@ -155,217 +133,20 @@ fn profile_static(path: PathBuf) -> Option<NamedFile> {
 }
 //staticファイルを伝えるメソッド終わり
 
-/*//databases
-#[macro_use] extern crate diesel;
-use std::ops::Deref;
-use rocket::http::Status;
-use rocket::request::{self, FromRequest};
-use rocket::{Request, State, Outcome};
-use diesel::pg::PgConnection;
-use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
-
-use diesel::QueryDsl;
-
-
-// An alias to the type for a pool of Diesel Mysql Connection
-type PgPool = Pool<ConnectionManager<PgConnection>>;
-
-// The URL to the database, set via the `DATABASE_URL` environment variable.
-static DATABASE_URL: &str = env!("DATABASE_URL");
-
-/// Initialize the database pool.
-fn connect() -> PgPool{
-    let manager = ConnectionManager::<PgConnection>::new(DATABASE_URL);
-    Pool::new(manager).expect("Failed to create pool")
-}
-
-// Connection request guard type: a wrapper around an r2d2 pooled connection.
-struct Connection(pub PooledConnection<ConnectionManager<PgConnection>>);
-
-/// Attempts to retrieve a single connection from the managed database pool. If
-/// no pool is currently managed, fails with an `InternalServerError` status. If
-/// no connections are available, fails with a `ServiceUnavailable` status.
-impl<'a, 'r> FromRequest<'a, 'r> for Connection {
-    type Error = ();
-
-    fn from_request(request: &'a Request<'r>) -> request::Outcome<Self, Self::Error> {
-        let pool = request.guard::<State<PgPool>>()?;
-        match pool.get() {
-            Ok(conn) => Outcome::Success(Connection(conn)),
-            Err(_) => Outcome::Failure((Status::ServiceUnavailable, ()))
-        }
-    }
-}
-
-// For the convenience of using an &Connection as an &MysqlConnection.
-impl Deref for Connection {
-    type Target = PgConnection;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}*/
 
 
 use diesel::prelude::*;
 
 
-mod schema {
-    table! {
-    posts (id) {
-        id -> Nullable<Int4>,
-        account -> Varchar,
-        title -> Varchar,
-        body -> Nullable<Text>,
-        img_url_1 -> Nullable<Text>,
-        img_url_2 -> Nullable<Text>,
-        img_url_3 -> Nullable<Text>,
-        img_url_4 -> Nullable<Text>,
-        regulation -> Bool,
-    }
-}
-    table! {
-    profile (id) {
-        id -> Nullable<Int4>,
-        name -> Varchar,
-        account -> Varchar,
-        profile_text -> Text,
-        profile_img -> Text,
-        regulation -> Bool,
-    }
-}
-}
-/*    table! {
-    posts (id) {
-        id -> Nullable<Integer>,
-        title -> VarChar,
-        //published -> Datetime,
-        body -> Text,
-        regulation -> Bool,
-    }
-}
-}*/
-
-
-/*use self::schema::posts;
-use self::schema::posts::dsl::{posts as all_posts, regulation as post_regulation};*/
-
-/*#[derive(Serialize, Queryable, Debug,Clone,Insertable)]
-#[table_name = "posts"]
-struct Post {
-    id: Option<i32>,
-    account: String,
-    title: String,
-    body: Option<String>,
-    img_url_1: Option<String>,
-    img_url_2: Option<String>,
-    img_url_3: Option<String>,
-    img_url_4: Option<String>,
-    regulation: bool
-}
-
-#[derive(FromForm)]
-struct PostForm{
-    title: String,
-    body: Option<String>,
-    img_url_1: Option<String>,
-    img_url_2: Option<String>,
-    img_url_3: Option<String>,
-    img_url_4: Option<String>,
-    regulation: bool,
-    *//*    regulation: bool,*//*
-}
-#[derive(FromForm)]
-struct GallaryForm{
-    img_url: String,
-    user_url: String,
-    regulation: bool
-    *//*    regulation: bool,*//*
-}*/
-/*
-#[derive(Serialize, Queryable, Debug,Clone)]
-#[table_name = "user"]
-struct User{
-    id: Option<i32>,
-    name: String,
-    mail_address: String,
-    account: String,
-    password: String,
-}
-*/
 
 #[derive(Debug,Serialize)]
 struct Context{
     post_img: Vec<image::PostImg>,
     profile: Vec<creater_setting::Profile>
 }
-/*#[derive(Debug,Serialize)]
-struct ContextGallary{
-    post_img: Vec<image::PostImg>
-}*/
 
-/*fn read(connection: &PgConnection) -> Vec<Post> {
-    //postsテーブルからデータを読み取る。
-    all_posts
-        .order(posts::id.desc())
-        .load::<Post>(connection)
-        .expect("error")
-}
 
-fn insert(postform:PostForm, conn: &PgConnection) -> bool{
-    let t = Post{
-        id: None,
-        account: "root".to_string(),
-        title: postform.title,
-        body: postform.body,
-        img_url_1: postform.img_url_1,
-        img_url_2: postform.img_url_2,
-        img_url_3: postform.img_url_3,
-        img_url_4: postform.img_url_4,
-        //保存したimg_urlをどうにかしてPost structへ・・・
-        regulation: false
-    };
-    *//*    println!("insert method");
-        println!("{}&{}",t.title,t.body);
-
-        let a = diesel::insert_into(posts::table).values(&t).execute(conn).unwrap();
-
-        //上の一行をコメントアウトすると一度のPOSTで二つ同じものをinsertすることになる（バグ）
-
-        println!("{:?}",a);*//*
-    diesel::insert_into(posts::table).values(&t).execute(conn).is_ok()
-}*/
 use rocket::response::Flash;
-
-/*#[post("/form_hoge", data = "<toukou_form>")]
-fn new(toukou_form: Form<PostForm>, connection: db::Connection) -> Flash<Redirect>{
-    let t = toukou_form.into_inner();
-
-    println!("postを通ってます。");
-    if insert(t,&connection) {
-        println!("成功してる");
-
-        Flash::success(Redirect::to("/creater/account/post/form_img"), "成功してる")
-    } else {
-        println!("失敗");
-        Flash::error(Redirect::to("/creater/account"), "失敗した。")
-    }
-}*/
-
-
-/*#[post("/form", data = "<toukou>")]
-fn article(toukou: Form<PostForm>, connection: db::Connection) -> Flash<Redirect>{
-    let t = toukou.into_inner();
-
-    println!("post");
-    if insert(t,&connection) {
-        println!("成功");
-        Flash::success(Redirect::to("/creater/account"), "成功してる")
-    } else {
-        println!("失敗");
-        Flash::error(Redirect::to("/creater/account"), "失敗した。")
-    }
-}*/
 
 
 use std::env;
@@ -394,25 +175,23 @@ fn files(path: PathBuf) -> Option<NamedFile> {
 
 impl Context{
     fn row(connection: &db::Connection, cookies:Cookies) -> Context{
+        //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
+        //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
         let aaa = cookies.get("account");
         Context{
             post_img: image::read_post_img(connection, aaa.clone()),
             profile:creater_setting::read_profile(&connection, aaa.clone())
         }
     }
-    /*    fn row_gallary(connection: &db::Connection) -> Context{
-            Context{
-                post_img: image::read_gallary(connection),
-                profile:creater_setting::read_profile(&connection, cookies)
-            }
-        }*/
+    fn account_row(connection: &db::Connection, account:String) -> Context{
+        //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
+        //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
+        Context{
+            post_img: image::read_post_img_normal(connection, account.clone()),
+            profile:creater_setting::read_profile_normal(&connection, account.clone())
+        }
+    }
 }
-
-
-//fn raw(conn: &Connection) -> Vec<Post>{
-//    post: Context::read()
-//}
-
 
 
 #[get("/creater/account/new")]
@@ -436,35 +215,9 @@ fn creater(account: User, connection: db::Connection) -> Template {  // <- reque
 }*/
 
 #[get("/creater")]              // <- route attribute
-fn creater(connection: db::Connection, cookies:Cookies) -> Template {  // <- request handler
-    Template::render("creaters", ProfileContext::row(&connection, cookies))
+fn creater(connection: db::Connection) -> Template {  // <- request handler
+    Template::render("creaters", ProfileContext::row(&connection))
 }
-
-
-
-
-
-/*use self::schema::profile;
-use self::schema::profile::dsl::{profile as all_profile , regulation as profile_regulation};*/
-
-/*#[derive(Serialize, Queryable, Debug,Clone,Insertable)]
-#[table_name = "profile"]
-struct Profile{
-    id: Option<i32>,
-    name: String,
-    account: String,
-    profile_text: String,
-    profile_img : String,
-    regulation: bool
-}
-
-#[derive(FromForm,Clone)]
-struct ProfileForm{
-    name: String,
-    profile_text: String,
-    profile_img: String,
-    *//*    regulation: bool,*//*
-}*/
 
 //profile郡
 #[derive(Debug,Serialize)]
@@ -473,45 +226,19 @@ struct ProfileContext{
 }
 
 impl ProfileContext{
-    fn row(connection: &db::Connection, cookies:Cookies) -> ProfileContext{
+    fn row(connection: &db::Connection) -> ProfileContext{
         ProfileContext{
-            profile:creater_setting::read_profile(&connection, cookies.get("account"))
+            profile:creater_setting::read_profiles_all(&connection)
         }
     }
 }
-
-/*#[post("/creater/account/new/profile", data = "<user>")]
-//signup.html.teraの処理
-fn profile_post(mut cookies:Cookies ,user: Form<ProfileForm>, connection: db::Connection) -> Flash<Redirect>{
-    let t = user.into_inner();
-
-    println!("post");
-    if (t,&connection, cookies) {
-        println!("成功");
-        Flash::success(Redirect::to("/creater/account"), "成功してる")
-        //次にcreaterの個人ページへ
-    } else {
-        Flash::error(Redirect::to("/signup"), "失敗した。")
-    }
-}
-fn insert(profileform:ProfileForm,conn: &PgConnection, cookies:Cookies) -> bool{
-    let t = Profile{
-        id: None,
-        name: profileform.name,
-        account:cookies.get("account").map(|c| c.value()).unwrap().to_string(),
-        profile_text: profileform.profile,
-        profile_img : profileform.profile_img,
-        regulation:false
-    };
-    diesel::insert_into(profile::table).values(&t).execute(conn).is_ok()
-}*/
 
 
 fn main() {
     rocket::ignite()
         .mount("/", routes![
 home,about_me,signup,login,signup_post,multipart_user_setting,
-all,creater_static,files,creater,user_setting,profile_static,user
+all,creater_static,files,creater,user_setting,profile_static,user,news
 ])
         .mount("/creater/account/post/", routes![multipart_upload])
         .manage(db::connect())

@@ -1,6 +1,6 @@
 table! {
     creater (id) {
-        id -> Int4,
+        id -> Nullable<Int4>,
         account -> Varchar,
         mail_address -> Varchar,
         password -> Varchar,
@@ -10,18 +10,19 @@ table! {
 
 table! {
     post_img (id) {
-        id -> Int4,
+        id -> Nullable<Int4>,
         account -> Varchar,
         title -> Varchar,
         body -> Text,
-        img_url_1 -> Nullable<Text>,
+        img_url_1 -> Text,
         regulation -> Bool,
+
     }
 }
 
 table! {
     profile (id) {
-        id -> Int4,
+        id -> Nullable<Int4>,
         name -> Varchar,
         account -> Varchar,
         profile_text -> Text,

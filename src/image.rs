@@ -16,22 +16,9 @@ use std::env;
 use regex::Regex;
 
 
-pub mod schema {
-    table! {
-    post_img (id) {
-        id -> Nullable<Int4>,
-        account -> Varchar,
-        title -> Varchar,
-        body -> Text,
-        img_url_1 -> Text,
-        regulation -> Bool,
 
-    }
-}
-}
-
-use self::schema::post_img;
-use self::schema::post_img::dsl::{post_img as all_post_img, regulation as post_img_regulation};
+use schema::post_img;
+use schema::post_img::dsl::{post_img as all_post_img, regulation as post_img_regulation};
 
 #[derive(Serialize, Queryable, Debug,Clone,Insertable)]
 #[table_name = "post_img"]
@@ -56,7 +43,7 @@ struct PostImgForm{
 
 #[post("/form", data = "<data>")]
 // signature requires the request to have a `Content-Type`
-fn multipart_upload(cont_type: &ContentType, data: Data, conn:Connection) -> Result<Stream<Cursor<Vec<u8>>>, Custom<String>> {
+fn multipart_upload(cont_type: &ContentType, data: Data, conn:Connection, cookies:Cookies) -> Result<Stream<Cursor<Vec<u8>>>, Custom<String>> {
     // this and the next check can be implemented as a request guard but it seems like just
     // more boilerplate than necessary
 
@@ -68,13 +55,13 @@ fn multipart_upload(cont_type: &ContentType, data: Data, conn:Connection) -> Res
     )?;
     //boundaryの取得
 
-    match process_upload(boundary, data,conn) {
+    match process_upload(boundary, data,conn,cookies) {
         Ok(resp) => Ok(Stream::from(Cursor::new(resp))),
         Err(err) => Err(Custom(Status::InternalServerError, err.to_string()))
     }
 }
 
-fn process_upload(boundary: &str, data: Data, conn:Connection) -> io::Result<Vec<u8>> {
+fn process_upload(boundary: &str, data: Data, conn:Connection, cookies:Cookies) -> io::Result<Vec<u8>> {
     let mut out = Vec::new();
     println!("process_upload関数");
 
@@ -83,7 +70,7 @@ fn process_upload(boundary: &str, data: Data, conn:Connection) -> io::Result<Vec
     // how the files are saved; Multipart would be a good impl candidate though
     match Multipart::with_body(data.open(), boundary).save().size_limit(None).with_dir("static/post_image"){
         //全てのフィールドを一旦保存する
-        Full(entries) => process_entries(entries, &mut out, conn)?,
+        Full(entries) => process_entries(entries, &mut out, conn,cookies)?,
         //成功,entriesにはフィールドが全て詰まっている
         Partial(partial, reason) => {
             //途中で失敗した。
@@ -92,7 +79,7 @@ fn process_upload(boundary: &str, data: Data, conn:Connection) -> io::Result<Vec
                 writeln!(out, "Stopped on field: {:?}", field.source.headers)?;
             }
 
-            process_entries(partial.entries, &mut out, conn)?
+            process_entries(partial.entries, &mut out, conn,cookies)?
         },
         Error(e) => return Err(e),
     }
@@ -114,7 +101,7 @@ use std::fs::rename;
 use std::mem::replace;
 
 
-fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection) -> io::Result<()> {
+fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, cookies:Cookies) -> io::Result<()> {
     {
 
         /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
@@ -150,7 +137,7 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection) -> 
             body:tmp[2].clone(),
             img_url_1:tmp[0].clone(),
         };
-        insert(t,&conn);
+        insert(t,&conn,cookies);
 
 
         /*        let hoge = entries.save_dir;
@@ -172,10 +159,10 @@ use rocket::http::Cookies;
 use rocket::http::Cookie;
 
 
-fn insert(postimgform:PostImgForm, conn: &PgConnection) -> bool{
+fn insert(postimgform:PostImgForm, conn: &PgConnection, cookies: Cookies) -> bool{
     let t = PostImg{
         id: None,
-        account: "root".to_string(),
+        account: cookies.get("account").map(|c| c.value()).unwrap().to_string(),
         title:postimgform.title,
         body: postimgform.body,
         img_url_1: postimgform.img_url_1,
@@ -188,6 +175,15 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection) -> bool{
     //postsテーブルからデータを読み取る。
     all_post_img
         .filter(post_img::account.eq(cookies.map(|c| c.value()).unwrap()))
+        //accountが◯◯のものを取り出す
+        .order(post_img::id.desc())
+        .load::<PostImg>(connection)
+        .expect("error")
+}
+pub fn read_post_img_normal(connection: &PgConnection, account:String) -> Vec<PostImg> {
+    //postsテーブルからデータを読み取る。
+    all_post_img
+        .filter(post_img::account.eq(account.as_str()))
         //accountが◯◯のものを取り出す
         .order(post_img::id.desc())
         .load::<PostImg>(connection)

@@ -199,4 +199,21 @@ pub fn read_profile(connection: &PgConnection, cookies: Option<&Cookie>) -> Vec<
         .load::<Profile>(connection)
         .expect("error")
 }
+pub fn read_profile_normal(connection: &PgConnection, account: String) -> Vec<Profile> {
+    //postsテーブルからデータを読み取る。
+    all_profile
+        //accountが◯◯のものを取り出す
+        .filter(profile::account.eq(account.as_str()))
+        .order(profile::id.desc())
+        .load::<Profile>(connection)
+        .expect("error")
+}
 
+pub fn read_profiles_all(connection: &PgConnection) -> Vec<Profile> {
+    //postsテーブルからデータを読み取る。
+    all_profile
+        //accountが◯◯のものを取り出す
+        .order(profile::id.desc())
+        .load::<Profile>(connection)
+        .expect("error")
+}

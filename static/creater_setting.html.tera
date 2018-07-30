@@ -1,14 +1,18 @@
 {% extends "Home" %}
 {% block content %}
-    <form action="/creater/user/setting" method="post" enctype="multipart/form-data">
-        <input type="text" name="name">
-        <br>
-        <textarea name="profile_text" id="profile_text" cols="30" rows="10">profile_text</textarea>
-        <br>
-        <input type="file" name="profile_img">
-        <br>
-        <input type="submit">
-        <br>
+
+    <form action="/creater/user/setting" method="post" name="form2" id="id_form2" enctype="multipart/form-data">
+        <div class="jumbotron">
+            <input type="submit">
+            <input name="profile_img" type="file" accept="image/*">
+            <fieldset>
+                <h3 class="display-4">
+                    <input type="text" name="name" id="name" style="width: 600px">
+                </h3>
+                <textarea name="profile_text" id="profile_text" cols="30" rows="10">profile_text</textarea>
+            </fieldset>
+        </div>
     </form>
+
 {% endblock content %}
 

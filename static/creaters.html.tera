@@ -23,7 +23,7 @@
                                 <p class="card-text">
                                     {{ tmp.profile_text}}
                                 </p>
-                                <a href="/creater/account">
+                                <a href="/creater/account/{{ tmp.account }}">
                                     <button type="button" class="btn btn-primary">{{ tmp.name}}さんのページへ</button>
                                 </a>
                             </div>
