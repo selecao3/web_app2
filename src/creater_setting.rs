@@ -192,9 +192,11 @@ use rocket::http::Cookie;
 
 pub fn read_profile(connection: &PgConnection, cookies: Option<&Cookie>) -> Vec<Profile> {
     //postsテーブルからデータを読み取る。
+
     all_profile
         //accountが◯◯のものを取り出す
-        .filter(profile::account.eq(cookies.map(|c| c.value()).unwrap()))
+/*        .filter(profile::account.eq(cookies.map(|c| c.value()).unwrap()))*/
+        .filter(profile::account.eq(cookies.unwrap().value()))
         .order(profile::id.desc())
         .load::<Profile>(connection)
         .expect("error")
