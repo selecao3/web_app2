@@ -91,8 +91,20 @@ use rocket::request::FromForm;
 fn admin(user: &RawStr) -> String {  // <- request handler
     format!("{}の個人ページ", user.as_str())*/
 
-#[get("/creater/account")]              // <- route attribute
+//==================================
+
+/*#[get("/creater/account")]              // <- route attribute
 fn user(connection: db::Connection, cookies:Cookies) -> Template {  // <- request handler
+    Template::render("profile_left",Context::row(&connection, cookies))
+}*/
+
+
+//==================================
+
+
+
+#[get("/creater/<account>")]              // <- route attribute
+fn user(connection: db::Connection, cookies:Cookies, account:&str) -> Template {  // <- request handler
     Template::render("profile_left",Context::row(&connection, cookies))
 }
 
@@ -299,6 +311,10 @@ struct Context{
     post_img: Vec<image::PostImg>,
     profile: Vec<creater_setting::Profile>
 }
+#[derive(Debug,Serialize)]
+struct ContextImg{
+    post_img: Vec<image::PostImg>
+}
 /*#[derive(Debug,Serialize)]
 struct ContextGallary{
     post_img: Vec<image::PostImg>
@@ -408,6 +424,13 @@ impl Context{
         }*/
 }
 
+impl ContextImg{
+    fn row_gallary(connection: &db::Connection) -> ContextImg{
+        ContextImg{
+            post_img: image::read_gallary(connection)
+        }
+    }
+}
 
 //fn raw(conn: &Connection) -> Vec<Post>{
 //    post: Context::read()
@@ -421,10 +444,10 @@ fn user_setting(connection: db::Connection, cookies:Cookies) -> Template {
 }
 
 
-/*#[get("/images")]              // <- route attribute
+#[get("/images")]              // <- route attribute
 fn images(connection: db::Connection) -> Template {  // <- request handler
-    Template::render("gallary", Context::row_gallary(&connection))
-}*/
+    Template::render("gallary", ContextImg::row_gallary(&connection))
+}
 
 
 
@@ -510,7 +533,7 @@ fn insert(profileform:ProfileForm,conn: &PgConnection, cookies:Cookies) -> bool{
 fn main() {
     rocket::ignite()
         .mount("/", routes![
-home,about_me,signup,login,signup_post,multipart_user_setting,
+home,about_me,signup,login,signup_post,multipart_user_setting,images,
 all,creater_static,files,creater,user_setting,profile_static,user
 ])
         .mount("/creater/account/post/", routes![multipart_upload])
