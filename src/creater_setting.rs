@@ -17,23 +17,8 @@ use std::env;
 use regex::Regex;
 
 
-
-mod schema{
-    table! {
-    profile (id) {
-        id -> Nullable<Int4>,
-        name -> Varchar,
-        account -> Varchar,
-        profile_text -> Text,
-        profile_img -> Text,
-        regulation -> Bool,
-    }
-}
-}
-
-
-use self::schema::profile;
-use self::schema::profile::dsl::{profile as all_profile , regulation as profile_regulation};
+use schema::profile;
+use schema::profile::dsl::{profile as all_profile , regulation as profile_regulation};
 
 #[derive(Serialize, Queryable, Debug,Clone,Insertable)]
 #[table_name = "profile"]
@@ -59,7 +44,7 @@ use rocket::http::Cookies;
 
 #[post("/creater/user/setting", data = "<data>")]
 // signature requires the request to have a `Content-Type`
-fn multipart_user_setting(cont_type: &ContentType, data: Data, conn:Connection, cookies:Cookies) -> Result<Stream<Cursor<Vec<u8>>>, Custom<String>> {
+fn multipart_user_setting(cont_type: &ContentType, data: Data, conn:Connection, cookies:Cookies) -> Result<Redirect, Custom<String>> {
     // this and the next check can be implemented as a request guard but it seems like just
     // more boilerplate than necessary
 
@@ -71,13 +56,13 @@ fn multipart_user_setting(cont_type: &ContentType, data: Data, conn:Connection, 
     )?;
     //boundaryの取得
 
-    match process_upload(boundary, data,conn,cookies) {
-        Ok(resp) => Ok(Stream::from(Cursor::new(resp))),
+    match process_upload(boundary, data,conn,&cookies) {
+        Ok(resp) => Ok(Redirect::to(format!("/creater/account/{}",&cookies.get("account").unwrap().value()).as_str())),
         Err(err) => Err(Custom(Status::InternalServerError, err.to_string()))
     }
 }
 
-fn process_upload(boundary: &str, data: Data, conn:Connection,cookies:Cookies) -> io::Result<Vec<u8>> {
+fn process_upload(boundary: &str, data: Data, conn:Connection,cookies:&Cookies) -> io::Result<Vec<u8>> {
     let mut out = Vec::new();
     println!("process_upload関数");
 
@@ -86,7 +71,7 @@ fn process_upload(boundary: &str, data: Data, conn:Connection,cookies:Cookies) -
     // how the files are saved; Multipart would be a good impl candidate though
     match Multipart::with_body(data.open(), boundary).save().size_limit(None).with_dir("static/profile_imgs"){
         //全てのフィールドを一旦保存する
-        Full(entries) => process_entries(entries, &mut out, conn, cookies)?,
+        Full(entries) => process_entries(entries, &mut out, conn, &cookies)?,
         //成功,entriesにはフィールドが全て詰まっている
         Partial(partial, reason) => {
             //途中で失敗した。
@@ -95,7 +80,7 @@ fn process_upload(boundary: &str, data: Data, conn:Connection,cookies:Cookies) -
                 writeln!(out, "Stopped on field: {:?}", field.source.headers)?;
             }
 
-            process_entries(partial.entries, &mut out, conn,cookies)?
+            process_entries(partial.entries, &mut out, conn,&cookies)?
         },
         Error(e) => return Err(e),
     }
@@ -117,7 +102,7 @@ use std::fs::rename;
 use std::mem::replace;
 
 
-fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, cookies:Cookies) -> io::Result<()> {
+fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, cookies:&Cookies) -> io::Result<()> {
     {
 
         /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
@@ -153,7 +138,7 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, coo
             name:tmp[1].clone(),
             profile_text:tmp[2].clone(),
         };
-        insert(t,&conn, cookies);
+        insert(t,&conn, &cookies);
 
 
         /*        let hoge = entries.save_dir;
@@ -174,7 +159,7 @@ use diesel::prelude::*;
 
 
 
-fn insert(profile:ProfileForm, conn: &PgConnection, cookies: Cookies) -> bool{
+fn insert(profile:ProfileForm, conn: &PgConnection, cookies: &Cookies) -> bool{
     println!("insertメソッド");
     let t = Profile{
         id: None,

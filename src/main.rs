@@ -177,6 +177,15 @@ fn files(path: PathBuf) -> Option<NamedFile> {
 
 
 impl Context{
+    fn row_image(connection: &db::Connection) -> Context{
+        //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
+        //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
+        Context{
+            post_img: image::read_gallary(&connection),
+            profile:creater_setting::read_profiles_all(&connection),
+            user_lisence: false
+        }
+    }
     fn row(connection: &db::Connection, cookies:Cookies) -> Context{
         //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
         //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
@@ -205,10 +214,10 @@ fn user_setting(connection: db::Connection, cookies:Cookies) -> Template {
 }
 
 
-/*#[get("/images")]              // <- route attribute
+#[get("/images")]              // <- route attribute
 fn images(connection: db::Connection) -> Template {  // <- request handler
-    Template::render("gallary", Context::row_gallary(&connection))
-}*/
+    Template::render("gallary", Context::row_image(&connection))
+}
 
 
 
@@ -243,7 +252,7 @@ fn main() {
     rocket::ignite()
         .mount("/", routes![
 home,about_me,signup,login,signup_post,multipart_user_setting,
-all,creater_static,files,creater,user_setting,profile_static,user,news
+all,creater_static,files,creater,user_setting,profile_static,user,news,images
 ])
         .mount("/creater/account/post/", routes![multipart_upload])
         .manage(db::connect())

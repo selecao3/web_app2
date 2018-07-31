@@ -123,7 +123,6 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, coo
 
             tmp.push(file_path);
 
-
         }
         if let SavedData::Text(title_string) = title_data{
             println!("{}",title_string);
