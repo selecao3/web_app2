@@ -20,9 +20,7 @@
     
                             <img style="height: 200px; width: 100%; display: block;" src="{{ tmp.profile_img}}" alt="Card image">
                             <div class="card-body text-primary">
-                                <p class="card-text">
-                                    {{ tmp.profile_text}}
-                                </p>
+                                <pre class="card-text"><p class="card-text">{{ tmp.profile_text}}</p></pre>
                                 <a href="/creater/account/{{ tmp.account }}">
                                     <button type="button" class="btn btn-primary">{{ tmp.name}}さんのページへ</button>
                                 </a>

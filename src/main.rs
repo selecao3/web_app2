@@ -83,9 +83,10 @@ use rocket::request::FromForm;
 fn user(connection: db::Connection, cookies:Cookies) -> Template {  // <- request handler
     Template::render("profile",Context::row(&connection, cookies))
 }*/
-#[get("/creater/account/<account>")]              // <- route attribute
+#[get("/creater/account/<account>", rank = 2)]              // <- route attribute
 fn user(connection: db::Connection, cookies:Cookies, account:String) -> Template {  // <- request handler
     if cookies.get("account").unwrap().value() == account.as_str() {
+        //そのユーザー自身がユーザー自身のページに入ったとき
         return Template::render("profile",Context::row(&connection, cookies))
     }else {
         return Template::render("profile",Context::account_row(&connection, account))
@@ -142,7 +143,9 @@ use diesel::prelude::*;
 #[derive(Debug,Serialize)]
 struct Context{
     post_img: Vec<image::PostImg>,
-    profile: Vec<creater_setting::Profile>
+    profile: Vec<creater_setting::Profile>,
+    user_lisence: bool
+    //user_lisenceがfalse == そのページの所有者とそのユーザーは一致しない。
 }
 
 
@@ -180,7 +183,8 @@ impl Context{
         let aaa = cookies.get("account");
         Context{
             post_img: image::read_post_img(connection, aaa.clone()),
-            profile:creater_setting::read_profile(&connection, aaa.clone())
+            profile:creater_setting::read_profile(&connection, aaa.clone()),
+            user_lisence: true
         }
     }
     fn account_row(connection: &db::Connection, account:String) -> Context{
@@ -188,7 +192,8 @@ impl Context{
         //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
         Context{
             post_img: image::read_post_img_normal(connection, account.clone()),
-            profile:creater_setting::read_profile_normal(&connection, account.clone())
+            profile:creater_setting::read_profile_normal(&connection, account.clone()),
+            user_lisence: false
         }
     }
 }
