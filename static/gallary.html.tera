@@ -1,21 +1,39 @@
 {% extends "Home"%}
 {% block content %}
+    <style>
+        div#grid {
+            margin: 0;
+            padding: 0;
+        }
+
+        #grid {
+            width: 100%;
+        }
+        li {
+            margin: 5px;
+            float: left;
+            list-style: none;
+        }
+    </style>
     <div class="bs-component">
-        <table class="table table-hover">
-            <tbody>
-                <tr class="table-active">
+                <!--1ブロック分-->
+                {% for img in post_img %}
+                    <div class="bs-component">
+                        <div class="table table-hover">
+                            <div id="grid">
+                                <ul>
+                                    <li>
+                                        <a href="/creater/account/{{ img.account }}">
+                                        <img src="{{ img.img_url_1 }}" height="280px" alt="Card image" />
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <!--1ブロック分-->
-                    {% for img in post_img %}
-                    <td>
-                            <a href="/creater/account/{{ img.account }}">
-                                <img style="height: 200px; width: 100%; display: block;" src="{{ img.img_url_1 }}" alt="Card image">
-                            </a>
-                            <!--特に名前などは追加せず、画像にアンカータグをつける-->
-                    </td>
-                    <!--1ブロック分-->
-                    {% endfor %}
-                </tr>
-            </tbody>
-        </table>
+                {% endfor %}
+
     </div>
+
 {% endblock content %}

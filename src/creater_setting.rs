@@ -106,7 +106,7 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, coo
     {
 
         /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
-        let name = &entries.fields.get(&"name".to_string()).unwrap().get(0).unwrap().data;
+        let name= &entries.fields.get(&"name".to_string()).unwrap().get(0).unwrap().data;
         let profile_text = &entries.fields.get(&"profile_text".to_string()).unwrap().get(0).unwrap().data;
         let profile_img= &entries.fields.get(&"profile_img".to_string()).unwrap().get(0).unwrap().data;
 
@@ -149,7 +149,7 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, coo
 
     }
 
-    writeln!(out, "Entries processed")
+    writeln!(out)
 }
 
 use diesel::pg::PgConnection;

@@ -7,95 +7,111 @@
         <title>同人誌サイト（仮）</title>
 
   <link rel="stylesheet" type="text/css" href="dist/css/bootstrap.css">
-  <style type="text/css">
-  .bs-component + .bs-component {
-    margin-top: 1rem;
-  }
-  @media (min-width: 768px) {
-    /*  
-    .bs-docs-section {
-      margin-top: 8em;
-    }
-    */
-    .bs-component {
-      position: relative;
-    }
-    .bs-component .modal {
-      position: relative;
-      top: auto;
-      right: auto;
-      bottom: auto;
-      left: auto;
-      z-index: 1;
-      display: block;
-    }
-    .bs-component .modal-dialog {
-      width: 90%;
-    }
-    .bs-component .popover {
-      position: relative;
-      display: inline-block;
-      width: 220px;
-      margin: 20px;
-    }
-    .nav-tabs {
-      margin-bottom: 15px;
-    }
-    .progress {
-      margin-bottom: 10px;
-    }
-  }
-  </style>
+
+
+    <script src="dist/js/masonry.pkgd.min.js"></script>
+    <script>
+        $(window).load(function() {
+            $('.list').masonry({
+                itemSelector: '.list-box',
+                isFitWidth: true
+            });
+        });
+
+    </script>
+
+
+
+
+    <style type="text/css">
+        .bs-component + .bs-component {
+            margin-top: 1rem;
+        }
+        @media (min-width: 768px) {
+            /*
+            .bs-docs-section {
+              margin-top: 8em;
+            }
+            */
+            .bs-component {
+                position: relative;
+            }
+            .bs-component .modal {
+                position: relative;
+                top: auto;
+                right: auto;
+                bottom: auto;
+                left: auto;
+                z-index: 1;
+                display: block;
+            }
+            .bs-component .modal-dialog {
+                width: 90%;
+            }
+            .bs-component .popover {
+                position: relative;
+                display: inline-block;
+                width: 220px;
+                margin: 20px;
+            }
+            .nav-tabs {
+                margin-bottom: 15px;
+            }
+            .progress {
+                margin-bottom: 10px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-      <div class="collapse navbar-collapse" id="navbar">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>
-          </li>
+        <div class="collapse navbar-collapse" id="navbar">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>
+                </li>
 
-          <li class="nav-item">
-            <a class="nav-link" href="/creater">creater</a>
-          </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/creater">creater</a>
+                </li>
 
-          <li class="nav-item">
-            <a class="nav-link" href="/images">gallary</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="http://github.com/windyakin/Honoka/wiki">about me</a>
-          </li>
-          <li class="nav-item">
-            <a href="/signup">
-              <button type="button" class="btn btn-secondary">
-                Sign up
-              </button>
-            </a>
-          </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/images">gallary</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="http://github.com/windyakin/Honoka/wiki">about me</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/signup">
+                        <button type="button" class="btn btn-secondary">
+                            Sign up
+                        </button>
+                    </a>
+                </li>
 
-        </ul>
-      </div>
-    </div>
-  </nav>
-    <!--contents-->
-    <div class="container">
-      <div class="page-header" id="banner">
-        <div class="row my-4">
-          <div class="col-12">
-
-            {% block content %}
-            {% endblock content %}
-
-            <!--        <iframe src="./news.html.tera" name="iframe" class="container" style="height: 1220px" frameborder="0"></iframe>-->
-          </div>
+            </ul>
         </div>
-      </div>
     </div>
+</nav>
+<!--contents-->
+<div class="container">
+    <div class="page-header" id="banner">
+        <div class="row my-4">
+            <div class="col-12">
+
+                {% block content %}
+                {% endblock content %}
+
+                <!--        <iframe src="./news.html.tera" name="iframe" class="container" style="height: 1220px" frameborder="0"></iframe>-->
+            </div>
+        </div>
+    </div>
+</div>
 
 
 

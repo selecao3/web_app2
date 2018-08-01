@@ -13,7 +13,7 @@ extern crate bcrypt;
 
 
 use image::static_rocket_route_info_for_multipart_upload;
-use signin::static_rocket_route_info_for_signup_post;
+use signup::static_rocket_route_info_for_signup_post;
 use creater_setting::static_rocket_route_info_for_multipart_user_setting;
 
 use rocket::http::RawStr;
@@ -25,7 +25,7 @@ use diesel::pg::PgConnection;
 
 mod image;
 mod db;
-mod signin;
+mod signup;
 mod creater_setting;
 mod schema;
 
@@ -84,14 +84,12 @@ fn user(connection: db::Connection, cookies:Cookies) -> Template {  // <- reques
     Template::render("profile",Context::row(&connection, cookies))
 }*/
 #[get("/creater/account/<account>", rank = 2)]              // <- route attribute
-fn user(connection: db::Connection, cookies:Cookies, account:String) -> Template {  // <- request handler
-    if cookies.get("account").unwrap().value() == account.as_str() {
+fn user(connection: db::Connection, mut cookies:Cookies, account:String) -> Template {  // <- request handler
         //そのユーザー自身がユーザー自身のページに入ったとき
-        return Template::render("profile",Context::row(&connection, cookies))
-    }else {
-        return Template::render("profile",Context::account_row(&connection, account))
-    }
-
+        match cookies.get_private("account") {
+            Some(cookie_account) => Template::render("profile",Context::row(&connection, cookies)),
+            None => Template::render("profile",Context::account_row(&connection, account))
+        }
 }
 #[get("/creater/account/news")]              // <- route attribute
 fn news(connection: db::Connection, cookies:Cookies) -> Template {  // <- request handler

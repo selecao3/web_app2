@@ -16,7 +16,7 @@
         <div class="card-body" id="change_to_form">
             <p class="card-text" id="Text01">
                 <span style="font-style: italic" id="Text02">
-                text
+                    <pre>{{ i.profile_text }}</pre>
                 </span>
             </p>
         </div>
@@ -43,11 +43,13 @@
 
         {% for i in post_img %}
 
-            <div class="jumbotron">
+            <div class="jumbotron" style="width: 900px">
                 <h3 class="display-4">{{ i.title }}</h3>
                 <pre><p class="lead">{{ i.body }}</p></pre>
                 <p class="lead">
-                    <img style="width: 600px" src="{{ i.img_url_1 }}" alt="">
+                    <a href="{{ i.img_url_1 }}" target="_blank">
+                        <img style="width: 300px" src="{{ i.img_url_1 }}" alt="">
+                    </a>
                 </p>
             </div>
         {% endfor %}
