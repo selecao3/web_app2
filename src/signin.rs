@@ -31,9 +31,11 @@ fn signin_post(mut cookies: Cookies, user: Form<SigninForm>, connection: db::Con
 
     println!("post");
     if check(&connection, &cookies, t.clone()){
-        cookies.add(Cookie::new("account",t.account_flag));
+        let mut cookie = Cookie::new("account",t.account_flag.clone());
+        &cookie.set_path("/creater");
+        cookies.add(cookie);
         println!("成功");
-        return Flash::success(Redirect::to("/creater/account/new"), "成功してる")
+        return Flash::success(Redirect::to(format!("/creater/account/{}",t.account_flag).as_str()), "成功してる")
     }else {
         return Flash::error(Redirect::to("/"), "miss")
     }
@@ -58,22 +60,8 @@ fn check(conn: &PgConnection, mut cookies: &Cookies, signin:SigninForm) -> bool 
         .select(password)
         .first(conn).unwrap();
     println!("{}",pass);
-    bcrypt::verify(pass.as_str(),signin.password_flag.as_str()).unwrap()
+    bcrypt::verify(signin.password_flag.as_str(), pass.as_str()).unwrap()
 }
-/*fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> bool{
-    let t = Signup{
-        id: None,
-        account: signupform.account,
-        mail_address: signupform.mail_address,
-        password: bcrypt::hash(signupform.password.trim(), bcrypt::DEFAULT_COST).unwrap(),
-        regulation: false
-    };
-    cookies.add(Cookie::new("account",t.clone().account));
-    diesel::insert_into(creater::table).values(&t).execute(conn).is_ok()
-    //account or mail_addressがDB上で同じだとFalse
-
-
-}*/
 pub fn read_user(connection: &PgConnection) -> Vec<Signup> {
     //postsテーブルからデータを読み取る。
     all_creater

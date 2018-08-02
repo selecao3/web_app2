@@ -14,6 +14,7 @@
             float: left;
             list-style: none;
         }
+
     </style>
     <div class="bs-component">
                 <!--1ブロック分-->
