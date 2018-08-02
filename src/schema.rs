@@ -12,6 +12,7 @@ table! {
     post_img (id) {
         id -> Nullable<Int4>,
         account -> Varchar,
+        name -> Varchar,
         title -> Varchar,
         body -> Text,
         img_url_1 -> Text,

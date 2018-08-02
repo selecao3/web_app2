@@ -12,53 +12,55 @@ use std::env;
 
 use db;
 
-
-
-pub use schema::creater;
-pub use schema::creater::dsl::{creater as all_creater};
-
-#[derive(Serialize, Queryable, Debug,Clone,Insertable)]
-#[table_name = "creater"]
-pub struct Signup{
-    id: Option<i32>,
-    account: String,
-    mail_address: String,
-    password: String,
-    regulation: bool
-}
+use schema::creater;
+use schema::creater::dsl::{creater as all_creater};
 
 #[derive(FromForm, Clone)]
-struct SignupForm{
-    account: String,
-    mail_address: String,
-    password: String,
+struct SigninForm{
+    account_flag: String,
+    password_flag: String,
 }
 
 use rocket::http::{Cookies,Cookie};
 use std::collections::HashMap;
 
-#[post("/creater/profile", data = "<user>")]
+#[post("/creater/profile/signin", data = "<user>")]
 //signup.html.teraからわたされたSignup structをDBへ取り込み、なおかつaccountの値をcookieに追加して、creater_setting.html.teraへリダイレクトする
-fn signup_post(mut cookies: Cookies, user: Form<SignupForm>, connection: db::Connection) -> Flash<Redirect>{
+fn signin_post(mut cookies: Cookies, user: Form<SigninForm>, connection: db::Connection) -> Flash<Redirect>{
     let t = user.into_inner();
-    let t_clone = t.clone();
 
     println!("post");
-    if insert(t_clone,&connection, cookies) {
+    if check(&connection, &cookies, t.clone()){
+        cookies.add(Cookie::new("account",t.account_flag));
         println!("成功");
-
-        Flash::success(Redirect::to("/creater/account/new"), "成功してる")
-        //creater編集画面へ
-    } else {
-        Flash::error(Redirect::to("/"), "失敗した。")
+        return Flash::success(Redirect::to("/creater/account/new"), "成功してる")
+    }else {
+        return Flash::error(Redirect::to("/"), "miss")
     }
+
 }
 
+use signup::Signup;
+use signup;
 
 use diesel::pg::PgConnection;
 use diesel;
 use diesel::prelude::*;
-fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> bool{
+
+use schema::profile::columns::account;
+use schema::creater::columns::password;
+
+fn check(conn: &PgConnection, mut cookies: &Cookies, signin:SigninForm) -> bool {
+    let pass:String = signup::all_creater
+        //型をStringとしないと、&str型になる。
+        //返り値はString型であるにもかかわらず、変数は&str型なので一致せずにエラー。
+        .filter(signup::creater::account.eq(signin.account_flag.as_str()))
+        .select(password)
+        .first(conn).unwrap();
+    println!("{}",pass);
+    bcrypt::verify(pass.as_str(),signin.password_flag.as_str()).unwrap()
+}
+/*fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> bool{
     let t = Signup{
         id: None,
         account: signupform.account,
@@ -71,7 +73,7 @@ fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> boo
     //account or mail_addressがDB上で同じだとFalse
 
 
-}
+}*/
 pub fn read_user(connection: &PgConnection) -> Vec<Signup> {
     //postsテーブルからデータを読み取る。
     all_creater

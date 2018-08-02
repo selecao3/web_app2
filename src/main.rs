@@ -15,6 +15,7 @@ extern crate bcrypt;
 use image::static_rocket_route_info_for_multipart_upload;
 use signup::static_rocket_route_info_for_signup_post;
 use creater_setting::static_rocket_route_info_for_multipart_user_setting;
+use signin::static_rocket_route_info_for_signin_post;
 
 use rocket::http::RawStr;
 use rocket::response::Redirect;
@@ -26,6 +27,7 @@ use diesel::pg::PgConnection;
 mod image;
 mod db;
 mod signup;
+mod signin;
 mod creater_setting;
 mod schema;
 
@@ -39,12 +41,8 @@ struct TemplateRenderTest{
 
 //getメソッド群
 #[get("/")]
-fn home() -> Template{
-    let context = TemplateRenderTest{
-        name: "name".to_string()
-        //nameという文字列がHome.html.teraの{{name}}に渡される
-    };
-    Template::render("news", &context)
+fn home(conn:db::Connection) -> Template{
+    Template::render("news", Context::row_image(&conn))
 }
 
 
@@ -71,7 +69,7 @@ fn login() -> Template {  // <- request handler
         name: "name".to_string()
         //nameという文字列がHome.html.teraの{{name}}に渡される
     };
-    Template::render("login", &context)
+    Template::render("signin", &context)
 }
 
 
@@ -86,10 +84,12 @@ fn user(connection: db::Connection, cookies:Cookies) -> Template {  // <- reques
 #[get("/creater/account/<account>", rank = 2)]              // <- route attribute
 fn user(connection: db::Connection, mut cookies:Cookies, account:String) -> Template {  // <- request handler
         //そのユーザー自身がユーザー自身のページに入ったとき
-        match cookies.get_private("account") {
-            Some(cookie_account) => Template::render("profile",Context::row(&connection, cookies)),
-            None => Template::render("profile",Context::account_row(&connection, account))
-        }
+    if cookies.get("account").unwrap().value() == account.as_str() {
+        //そのユーザー自身がユーザー自身のページに入ったとき
+        return Template::render("profile",Context::row(&connection, cookies))
+    }else {
+        return Template::render("profile",Context::account_row(&connection, account))
+    }
 }
 #[get("/creater/account/news")]              // <- route attribute
 fn news(connection: db::Connection, cookies:Cookies) -> Template {  // <- request handler
@@ -250,7 +250,7 @@ fn main() {
     rocket::ignite()
         .mount("/", routes![
 home,about_me,signup,login,signup_post,multipart_user_setting,
-all,creater_static,files,creater,user_setting,profile_static,user,news,images
+all,creater_static,files,creater,user_setting,profile_static,user,news,images,signin_post
 ])
         .mount("/creater/account/post/", routes![multipart_upload])
         .manage(db::connect())

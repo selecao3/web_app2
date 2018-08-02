@@ -17,8 +17,8 @@ use std::env;
 use regex::Regex;
 
 
-use schema::profile;
-use schema::profile::dsl::{profile as all_profile , regulation as profile_regulation};
+pub use schema::profile;
+pub use schema::profile::dsl::{profile as all_profile , regulation as profile_regulation};
 
 #[derive(Serialize, Queryable, Debug,Clone,Insertable)]
 #[table_name = "profile"]

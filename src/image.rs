@@ -25,6 +25,7 @@ use schema::post_img::dsl::{post_img as all_post_img, regulation as post_img_reg
 pub struct PostImg {
     id: Option<i32>,
     account: String,
+    name: String,
     title: String,
     body: String,
     img_url_1: String,
@@ -148,8 +149,6 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, coo
 
     }
     writeln!(out)
-
-
 }
 
 use diesel::pg::PgConnection;
@@ -159,11 +158,24 @@ use diesel::prelude::*;
 use rocket::http::Cookies;
 use rocket::http::Cookie;
 
+use creater_setting;
+use creater_setting::Profile;
+use creater_setting::profile;
+
 
 fn insert(postimgform:PostImgForm, conn: &PgConnection, cookies: &Cookies) -> bool{
     let t = PostImg{
         id: None,
-        account: cookies.get("account").map(|c| c.value()).unwrap().to_string(),
+        account: cookies.get("account").map(|c| c.value()).unwrap().to_string().clone(),
+        name: creater_setting::all_profile
+            .filter(creater_setting::profile::account.eq(cookies
+            .get("account")
+            //profileテーブルのそのユーザーのアカウントが入っている"行"を抽出する
+            .map(|c| c.value()).unwrap()))
+            .select(name)
+            //nameの列を抽出
+            .first(conn).unwrap(),
+        //投稿したユーザーのnameを取ってくる
         title:postimgform.title,
         body: postimgform.body,
         img_url_1: postimgform.img_url_1,
@@ -172,6 +184,9 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection, cookies: &Cookies) -> bo
     };
     diesel::insert_into(post_img::table).values(&t).execute(conn).is_ok()
 }
+use schema::profile::columns::name;
+
+
     pub fn read_post_img(connection: &PgConnection, cookies:Option<&Cookie>) -> Vec<PostImg> {
     //postsテーブルからデータを読み取る。
     all_post_img

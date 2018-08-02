@@ -25,16 +25,19 @@
         </div>
 
         <!--block-->
+
+
         <div class="bs-component">
-                {{name}}さんがタイトル「{{name}}」を投稿しました！
-                <hr>
-                〇〇さんがタイトル「△△」を投稿しました！
-                <hr>
-                </div>
-                <!--block-->
-                
-                </div>
-                <!--block-->
-                
-                </div>
+            {% for i in post_img %}
+            {{i.name}}さんがタイトル「<a href="/creater/account/{{ i.account }}"><b>{{i.title}}</b></a>」を投稿しました！
+            <hr>
+            {% endfor %}
+        </div>
+        <!--block-->
+
+
+    </div>
+    <!--block-->
+
+</div>
 {% endblock content %}
