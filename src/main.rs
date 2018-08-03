@@ -10,6 +10,8 @@ extern crate formdata;
 #[macro_use] extern crate diesel;
 extern crate regex;
 extern crate bcrypt;
+extern crate comrak;
+extern crate resize;
 
 
 use image::static_rocket_route_info_for_multipart_upload;

@@ -15,6 +15,8 @@ use std::env;
 
 use regex::Regex;
 
+use comrak::{markdown_to_html, ComrakOptions};
+
 
 
 use schema::post_img;
@@ -131,7 +133,10 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, coo
         }
         if let SavedData::Text(body_string) = body_data{
             println!("{}",body_string);
-            tmp.push(body_string.to_string());
+
+            let html = markdown_to_html(body_string, &ComrakOptions::default());
+            println!("{}",html);
+            tmp.push(html);
         }
         let t = PostImgForm{
             title:tmp[1].clone(),
