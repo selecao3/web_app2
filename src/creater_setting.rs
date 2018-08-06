@@ -197,9 +197,8 @@ pub fn read_profile_normal(connection: &PgConnection, account: String) -> Vec<Pr
 }
 
 pub fn read_profiles_all(connection: &PgConnection) -> Vec<Profile> {
-    //postsテーブルからデータを読み取る。
+    //postsテーブルから全てデータを読み取る。
     all_profile
-        //accountが◯◯のものを取り出す
         .order(profile::id.desc())
         .load::<Profile>(connection)
         .expect("error")

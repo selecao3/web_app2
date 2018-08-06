@@ -18,15 +18,17 @@
             width: auto;
             height: 100%;
         }
-    .cover {
-    display: block;
-    background-color: #ccc;
-    background-position: center center;
-    background-repeat: no-repeat;
-        margin: 0 auto;
-    width: 300px;
-    background-size: cover;
-}
+        .cover {
+            display: block;
+            background-color: #ccc;
+            background-position: center center;
+            background-repeat: no-repeat;
+            margin: 0 auto;
+            width: 280px;
+            height: 200px;
+            background-size: cover;
+            object-fit: cover;
+        }
     </style>
 
     <!--ブロック一個分作る。-->
@@ -46,7 +48,7 @@
                         <div class="card border-primary" style="max-width: 20rem; margin: 0 auto;">
                             <h4 class="card-header">{{ tmp.name }}</h4>
 
-                                <img class="cover"  src="{{ tmp.profile_img}}" alt="Card image">
+                            <img class="cover"  src="{{ tmp.profile_img}}" alt="Card image">
 
                             <div class="card-body text-primary">
                                 <pre class="card-text"><p class="card-text">{{ tmp.profile_text}}</p></pre>

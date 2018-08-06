@@ -95,6 +95,8 @@
                 </li>
 
             </ul>
+            {% block user_lisence %}
+            {% endblock user_lisence %}
         </div>
     </div>
 </nav>
