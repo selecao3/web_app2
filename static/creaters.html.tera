@@ -39,30 +39,27 @@
     </div>
     <!--block-->
     <div class="bs-component">
-        <table class="table table-hover">
-            <tbody>
-            <tr class="table-active">
-                <!--1ブロック分-->
+        <div class="table-active" style="width: 100%">
+            <div style="justify-content: space-between;display: inline-flex;flex-wrap: wrap;">
                 {% for tmp in profile%}
-                    <td style="width: 360px">
-                        <div class="card border-primary" style="max-width: 20rem; margin: 0 auto;">
+                    <div style="margin-right: 10px;margin-left: 10px;margin-top: 40px;">
+                        <div class="card border-primary" style="width: 300px;height: 400px;">
                             <h4 class="card-header">{{ tmp.name }}</h4>
 
-                            <img class="cover"  src="{{ tmp.profile_img}}" alt="Card image">
+                            <img class="cover" src="{{ tmp.profile_img}}" alt="Card image">
 
                             <div class="card-body text-primary">
-                                <pre class="card-text"><p class="card-text">{{ tmp.profile_text}}</p></pre>
+                                <pre class="card-text" style="height: 50px;"><p class="card-text">{{ tmp.profile_text}}</p></pre>
                                 <a href="/creater/account/{{ tmp.account }}">
                                     <button type="button" class="btn btn-primary">{{ tmp.name}}さんのページへ</button>
                                 </a>
                             </div>
                         </div>
-                    </td>
+                    </div>
                 {% endfor %}
-                <!--1ブロック分-->
-            </tr>
-            </tbody>
-        </table>
+            </div>
+        </div>
+
     </div>
     <!--block-->
 {% endblock content%}

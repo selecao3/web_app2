@@ -48,7 +48,6 @@ fn home(conn:db::Connection) -> Template{
 }
 
 
-
 #[get("/about_me")]              // <- route attribute
 fn about_me() -> Template {  // <- request handler
     let context = TemplateRenderTest{
@@ -86,17 +85,20 @@ fn user(connection: db::Connection, cookies:Cookies) -> Template {  // <- reques
 }*/
 #[get("/creater/account/<account>", rank = 2)]              // <- route attribute
 fn user(connection: db::Connection, mut cookies:Cookies, account:String) -> Template {  // <- request handler
-    //そのユーザー自身がユーザー自身のページに入ったとき
-    if cookies.get("account").unwrap().value() == account.as_str() {
         //そのユーザー自身がユーザー自身のページに入ったとき
-        return Template::render("profile",Context::row(&connection, cookies))
-    }else {
-        return Template::render("profile",Context::account_row(&connection, account))
+    match cookies.get("account") {
+        Some(c) => if c.value() == account.as_str(){
+            return Template::render("profile",Context::row(&connection, &cookies))
+        }else {
+            return Template::render("profile",Context::account_row(&connection, account))
+        }
+        None => return Template::render("profile",Context::account_row(&connection, account))
+
     }
 }
 #[get("/creater/account/news")]              // <- route attribute
 fn news(connection: db::Connection, cookies:Cookies) -> Template {  // <- request handler
-    Template::render("news_creater",Context::row(&connection, cookies))
+    Template::render("news_creater",Context::row(&connection, &cookies))
 }
 
 //getメソッド群終わり
@@ -179,16 +181,17 @@ fn files(path: PathBuf) -> Option<NamedFile> {
 
 impl Context{
     fn row_image(connection: &db::Connection) -> Context{
-        //gallary,Home.html.teraに使用
+        //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
+        //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
         Context{
             post_img: image::read_gallary(&connection),
             profile:creater_setting::read_profiles_all(&connection),
             user_lisence: false
         }
     }
-    //cookieが関係するページに使用。
-    //つまり、自分自身が自分のページに訪れた時の関数
-    fn row(connection: &db::Connection, cookies:Cookies) -> Context{
+    fn row(connection: &db::Connection, cookies:&Cookies) -> Context{
+        //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
+        //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
         let aaa = cookies.get("account");
         Context{
             post_img: image::read_post_img(connection, aaa.clone()),
@@ -197,8 +200,8 @@ impl Context{
         }
     }
     fn account_row(connection: &db::Connection, account:String) -> Context{
-        //そのユーザー（例：hoge01）がとあるユーザー（例：hoge02）のページに訪れた際に使用する関数。
-        //cookie依存ではない。
+        //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
+        //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
         Context{
             post_img: image::read_post_img_normal(connection, account.clone()),
             profile:creater_setting::read_profile_normal(&connection, account.clone()),
@@ -210,7 +213,7 @@ impl Context{
 
 #[get("/creater/account/new")]
 fn user_setting(connection: db::Connection, cookies:Cookies) -> Template {
-    Template::render("creater_setting", Context::row(&connection, cookies))
+    Template::render("creater_setting", Context::row(&connection, &cookies))
 }
 
 
@@ -252,7 +255,7 @@ fn main() {
     rocket::ignite()
         .mount("/", routes![
 home,about_me,signup,login,signup_post,multipart_user_setting,
-all,creater_static,files,creater,user_setting,profile_static,user,news,images,signin_post,home_sign
+all,creater_static,files,creater,user_setting,profile_static,user,news,images,signin_post
 ])
         .mount("/creater/account/post/", routes![multipart_upload])
         .manage(db::connect())

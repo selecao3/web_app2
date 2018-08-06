@@ -66,7 +66,9 @@ fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> boo
         password: bcrypt::hash(signupform.password.trim(), bcrypt::DEFAULT_COST).unwrap(),
         regulation: false
     };
-    cookies.add(Cookie::new("account",t.clone().account));
+    let mut cookie = Cookie::new("account",t.clone().account);
+    cookies.add(cookie.clone());
+    cookie.make_permanent();
     diesel::insert_into(creater::table).values(&t).execute(conn).is_ok()
     //account or mail_addressがDB上で同じだとFalse
 
