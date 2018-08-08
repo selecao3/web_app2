@@ -15,7 +15,8 @@ CREATE TABLE profile (
   account VARCHAR NOT NULL,
   profile_text TEXT NOT NULL,
   profile_img TEXT NOT NULL,
-  regulation BOOLEAN NOT NULL DEFAULT 'f'
+  regulation BOOLEAN NOT NULL DEFAULT 'f',
+  created_day TIMESTAMP default CURRENT_TIMESTAMP
 );
 
 CREATE TABLE creater(

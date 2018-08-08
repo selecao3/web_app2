@@ -14,7 +14,10 @@ use std::io::{self, Cursor, Write};
 use rocket::response::Redirect;
 use std::env;
 
-use regex::Regex;
+
+use diesel::sql_types::Date;
+use chrono::{NaiveDateTime, TimeZone, Utc};
+
 
 
 pub use schema::profile;
@@ -28,7 +31,9 @@ pub struct Profile{
     account: String,
     profile_text: String,
     profile_img : String,
-    regulation: bool
+    regulation: bool,
+    created_day: Option<NaiveDateTime>
+
 }
 
 #[derive(FromForm)]
@@ -138,7 +143,14 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, coo
             name:tmp[1].clone(),
             profile_text:tmp[2].clone(),
         };
-        insert(t,&conn, &cookies);
+
+
+        //データがダブっていたら死ぬ（バグ）
+        if read_profile(&conn, cookies.get("account")).is_empty(){
+            insert(t,&conn, &cookies);
+        }else {
+            update(t, &conn,&cookies);
+        }
 
 
         /*        let hoge = entries.save_dir;
@@ -158,9 +170,8 @@ use diesel::prelude::*;
 
 
 
-
-fn insert(profile:ProfileForm, conn: &PgConnection, cookies: &Cookies) -> bool{
-    println!("insertメソッド");
+fn update(profile:ProfileForm, conn: &PgConnection, cookies: &Cookies) -> bool{
+    println!("updateメソッド");
     let t = Profile{
         id: None,
         account:cookies.get("account").map(|c| c.value()).unwrap().to_string(),
@@ -168,7 +179,35 @@ fn insert(profile:ProfileForm, conn: &PgConnection, cookies: &Cookies) -> bool{
         profile_text: profile.profile_text,
         profile_img: profile.profile_img,
         //保存したimg_urlをどうにかしてPost structへ・・・
-        regulation: false
+        regulation: false,
+        created_day:None
+
+    };
+    diesel::update(all_profile
+        .filter(profile::account.eq(cookies.get("account").unwrap().value())))
+        .set((
+            profile::name.eq(&t.name),
+            profile::profile_text.eq(&t.profile_text),
+            profile::profile_img.eq(&t.profile_img)
+        )
+        )
+        .execute(conn)
+        .is_ok()
+}
+
+
+fn insert(profile:ProfileForm, conn: &PgConnection,cookies: &Cookies) -> bool{
+    println!("insertメソッド");
+
+    let t = Profile{
+        id: None,
+        account:cookies.get("account").map(|c| c.value()).unwrap().to_string(),
+        name:profile.name,
+        profile_text: profile.profile_text,
+        profile_img: profile.profile_img,
+        //保存したimg_urlをどうにかしてPost structへ・・・
+        regulation: false,
+        created_day:None
     };
     diesel::insert_into(profile::table).values(&t).execute(conn).is_ok()
 }
@@ -180,7 +219,7 @@ pub fn read_profile(connection: &PgConnection, cookies: Option<&Cookie>) -> Vec<
 
     all_profile
         //accountが◯◯のものを取り出す
-/*        .filter(profile::account.eq(cookies.map(|c| c.value()).unwrap()))*/
+        /*        .filter(profile::account.eq(cookies.map(|c| c.value()).unwrap()))*/
         .filter(profile::account.eq(cookies.unwrap().value()))
         .order(profile::id.desc())
         .load::<Profile>(connection)

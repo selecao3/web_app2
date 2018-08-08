@@ -17,7 +17,6 @@ table! {
         body -> Text,
         img_url_1 -> Text,
         regulation -> Bool,
-
     }
 }
 
@@ -29,6 +28,7 @@ table! {
         profile_text -> Text,
         profile_img -> Text,
         regulation -> Bool,
+        created_day -> Nullable<Timestamp>,
     }
 }
 
@@ -37,3 +37,4 @@ allow_tables_to_appear_in_same_query!(
     post_img,
     profile,
 );
+

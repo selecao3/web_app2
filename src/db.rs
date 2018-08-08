@@ -22,6 +22,7 @@ pub fn connect() -> PgPool{
     Pool::new(manager).expect("Failed to create pool")
 }
 
+
 // Connection request guard type: a wrapper around an r2d2 pooled connection.
 pub struct Connection(pub PooledConnection<ConnectionManager<PgConnection>>);
 

@@ -15,7 +15,16 @@
     </style>
     {% for i in profile%}
         <div class="card mb-3" style="width: 300px; display: inline-block">
-        <h3 class="card-header">{{ i.name }}</h3>
+            <h3 class="card-header">{{ i.name }}
+                {% if user_lisence == true %}
+                    <a href="/creater/account/new">
+                        <button type="button" class="btn btn-primary" style="margin-left: 100px;">変更</button>
+                    </a>
+                {% endif %}
+
+            </h3>
+
+
         <div class="card-body">
 
             <h5 class="card-title">{{ i.account}}</h5>
@@ -42,7 +51,10 @@
 <div class="card-footer text-muted">
     2 days ago
 </div>
+
+
 </div>
+
 
 
 

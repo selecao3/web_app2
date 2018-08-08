@@ -12,6 +12,8 @@ extern crate regex;
 extern crate bcrypt;
 extern crate comrak;
 extern crate resize;
+extern crate chrono;
+
 
 
 use image::static_rocket_route_info_for_multipart_upload;
@@ -86,6 +88,7 @@ fn user(connection: db::Connection, cookies:Cookies) -> Template {  // <- reques
 #[get("/creater/account/<account>", rank = 2)]              // <- route attribute
 fn user(connection: db::Connection, mut cookies:Cookies, account:String) -> Template {  // <- request handler
         //そのユーザー自身がユーザー自身のページに入ったとき
+    cookies.remove(Cookie::named("first"));
     match cookies.get("account") {
         Some(c) => if c.value() == account.as_str(){
             return Template::render("profile",Context::row(&connection, &cookies))
