@@ -19,6 +19,9 @@ bcrypt = "0.2.0"
 comrak = "*"
 resize = "*"
 chrono = { version = "*", features = ["serde"]}
+chrono-tz = { version = "0.5", features = ["serde"] }
+
+
 
 [dependencies.rocket_contrib]
 version = "*"

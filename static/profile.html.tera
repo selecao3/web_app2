@@ -18,7 +18,7 @@
             <h3 class="card-header">{{ i.name }}
                 {% if user_lisence == true %}
                     <a href="/creater/account/new">
-                        <button type="button" class="btn btn-primary" style="margin-left: 100px;">変更</button>
+                        <button type="button" class="btn btn-primary" style="float: right;">変更</button>
                     </a>
                 {% endif %}
 
@@ -42,18 +42,18 @@
                 </span>
             </p>
         </div>
-    {% endfor %}
+
 
 <ul class="list-group list-group-flush">
     <li class="list-group-item">@selecao3</li>
     <li class="list-group-item">@selecao114514</li>
 </ul>
 <div class="card-footer text-muted">
-    2 days ago
+    最終更新日時
+    <br>{{ i.created_day|date(format="%Y年%m月%d日 %H時%M分") }}
 </div>
-
-
 </div>
+    {% endfor %}
 
 
 
