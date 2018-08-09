@@ -45,8 +45,19 @@
 
 
 <ul class="list-group list-group-flush">
-    <li class="list-group-item">@selecao3</li>
-    <li class="list-group-item">@selecao114514</li>
+    <li class="list-group-item">
+        <a href="{{ i.content01 }}">ツイッター</a>
+    </li>
+    <li class="list-group-item">
+        <a href="{{ i.content02 }}">名工大</a>
+
+    </li>
+    <li class="list-group-item">
+        {{ i.content03 }}
+    </li>
+    <li class="list-group-item">
+        {{ i.content04 }}
+    </li>
 </ul>
 <div class="card-footer text-muted">
     最終更新日時
@@ -74,9 +85,8 @@
                 </p>
             </div>
         {% endfor %}
-
-
     </div>
+    <a href="/creater/profile/signout">hoge</a>
 
 {% endblock content %}
 {% block user_lisence %}

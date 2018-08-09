@@ -67,7 +67,7 @@ fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> boo
         regulation: false
     };
     let mut cookie_account = Cookie::new("account",t.clone().account);
-    cookies.add(cookie_account.clone());
+    cookies.add_private(cookie_account.clone());
     diesel::insert_into(creater::table).values(&t).execute(conn).is_ok()
     //account or mail_addressがDB上で同じだとFalse
 

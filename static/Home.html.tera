@@ -7,18 +7,7 @@
         <title>同人誌サイト（仮）</title>
 
   <link rel="stylesheet" type="text/css" href="dist/css/bootstrap.css">
-
-
-    <script src="dist/js/masonry.pkgd.min.js"></script>
-    <script>
-        $(window).load(function() {
-            $('.list').masonry({
-                itemSelector: '.list-box',
-                isFitWidth: true
-            });
-        });
-
-    </script>
+   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
 
 

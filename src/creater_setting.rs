@@ -59,7 +59,7 @@ use rocket::http::Cookies;
 
 #[post("/creater/user/setting", data = "<data>")]
 // signature requires the request to have a `Content-Type`
-fn multipart_user_setting(cont_type: &ContentType, data: Data, conn:Connection, cookies:Cookies) -> Result<Redirect, Custom<String>> {
+fn multipart_user_setting(cont_type: &ContentType, data: Data, conn:Connection,mut cookies:Cookies) -> Result<Redirect, Custom<String>> {
     // this and the next check can be implemented as a request guard but it seems like just
     // more boilerplate than necessary
 
@@ -70,14 +70,15 @@ fn multipart_user_setting(cont_type: &ContentType, data: Data, conn:Connection, 
         )
     )?;
     //boundaryの取得
+    let cookie = cookies.get_private("account");
 
-    match process_upload(boundary, data,conn,&cookies) {
-        Ok(resp) => Ok(Redirect::to(format!("/creater/account/{}",&cookies.get("account").unwrap().value()).as_str())),
+    match process_upload(boundary, data,conn,cookies) {
+        Ok(resp) => Ok(Redirect::to(format!("/creater/account/{}",cookie.unwrap().value()).as_str())),
         Err(err) => Err(Custom(Status::InternalServerError, err.to_string()))
     }
 }
 
-fn process_upload(boundary: &str, data: Data, conn:Connection,cookies:&Cookies) -> io::Result<Vec<u8>> {
+fn process_upload(boundary: &str, data: Data, conn:Connection,cookies:Cookies) -> io::Result<Vec<u8>> {
     let mut out = Vec::new();
     println!("process_upload関数");
 
@@ -86,7 +87,7 @@ fn process_upload(boundary: &str, data: Data, conn:Connection,cookies:&Cookies) 
     // how the files are saved; Multipart would be a good impl candidate though
     match Multipart::with_body(data.open(), boundary).save().size_limit(None).with_dir("static/profile_imgs"){
         //全てのフィールドを一旦保存する
-        Full(entries) => process_entries(entries, &mut out, conn, &cookies)?,
+        Full(entries) => process_entries(entries, &mut out, conn, cookies)?,
         //成功,entriesにはフィールドが全て詰まっている
         Partial(partial, reason) => {
             //途中で失敗した。
@@ -95,7 +96,7 @@ fn process_upload(boundary: &str, data: Data, conn:Connection,cookies:&Cookies) 
                 writeln!(out, "Stopped on field: {:?}", field.source.headers)?;
             }
 
-            process_entries(partial.entries, &mut out, conn,&cookies)?
+            process_entries(partial.entries, &mut out, conn,cookies)?
         },
         Error(e) => return Err(e),
     }
@@ -117,7 +118,7 @@ use std::fs::rename;
 use std::mem::replace;
 
 
-fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, cookies:&Cookies) -> io::Result<()> {
+fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection,mut cookies:Cookies) -> io::Result<()> {
     {
 
         /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
@@ -148,26 +149,35 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, coo
             println!("{}",profile_string);
             tmp.push(profile_string.to_string());
         }
-        for i in 0..4 {
+        for i in 1..5 {
             println!("======");
-            let content = match &entries.fields.get(&format!("content0{}",i)){
+/*            let content = match &entries.fields.get(&format!("content0{}",i)){
                 Some(con) => match &con.get(0){
                     Some(con) => &con.data |c| SavedData::Text(cont) = c{
                     },
                     None => {{continue}}
                 }
                 None =>{{continue}}
-            };
+            };*/
             //breakのせいでif文にはいっていない
             //continueだとif文に入る前にfor文を繰り返す。
-            println!("===={:?}====",content);
 
-            if let SavedData::Text(cont) = content{
-                println!("==={}====", cont);
-                tmp.push(cont.to_string());
-                //値が入ったもののみ
+            if let Some(con_1) = &entries.fields.get(&format!("content0{}",i)){
+                let con_option = con_1.get(0);
+                if let Some(con_2) = con_option{
+                    let con_val = &con_2.data;
+                    if let SavedData::Text(cont) = &con_val{
+                        println!("==={}====", cont);
+                        tmp.push(cont.to_string());
+                        //値が入ったもののみ
+                    }else {
+                        println!("===空欄====", );
+                        tmp.push("".to_string());
+                    }
+                }else {
+                    tmp.push("".to_string());
+                }
             }else {
-                println!("===空欄====", );
                 tmp.push("".to_string());
             }
             //この時点で空欄のものと何かしらの値が入ったものにわけられている。
@@ -187,10 +197,10 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, coo
 
 
         //データがダブっていたら死ぬ（バグ）
-        if read_profile(&conn, cookies.get("account")).is_empty(){
-            insert(t,&conn, &cookies);
+        if read_profile(&conn, cookies.get_private("account")).is_empty(){
+            insert(t,&conn, cookies);
         }else {
-            update(t, &conn,&cookies);
+            update(t, &conn,cookies);
         }
 
 
@@ -211,12 +221,12 @@ use diesel::prelude::*;
 
 
 
-fn update(profile:ProfileForm, conn: &PgConnection, cookies: &Cookies) -> bool{
+fn update(profile:ProfileForm, conn: &PgConnection,mut cookies: Cookies) -> bool{
     println!("updateメソッド");
 
     let t = Profile{
         id: None,
-        account:cookies.get("account").map(|c| c.value()).unwrap().to_string(),
+        account:cookies.get_private("account").unwrap().value().to_string(),
         name:profile.name,
         profile_text: profile.profile_text,
         profile_img: profile.profile_img,
@@ -230,7 +240,7 @@ fn update(profile:ProfileForm, conn: &PgConnection, cookies: &Cookies) -> bool{
 
     };
     diesel::update(all_profile
-        .filter(profile::account.eq(cookies.get("account").unwrap().value())))
+        .filter(profile::account.eq(cookies.get_private("account").unwrap().value())))
         .set((
             profile::name.eq(&t.name),
             profile::profile_text.eq(&t.profile_text),
@@ -247,12 +257,12 @@ fn update(profile:ProfileForm, conn: &PgConnection, cookies: &Cookies) -> bool{
 }
 
 
-fn insert(profile:ProfileForm, conn: &PgConnection,cookies: &Cookies) -> bool{
+fn insert(profile:ProfileForm, conn: &PgConnection,mut cookies: Cookies) -> bool{
     println!("insertメソッド");
 
     let t = Profile{
         id: None,
-        account:cookies.get("account").map(|c| c.value()).unwrap().to_string(),
+        account:cookies.get_private("account").unwrap().value().to_string(),
         name:profile.name,
         profile_text: profile.profile_text,
         profile_img: profile.profile_img,
@@ -269,7 +279,7 @@ fn insert(profile:ProfileForm, conn: &PgConnection,cookies: &Cookies) -> bool{
 
 use rocket::http::Cookie;
 
-pub fn read_profile(connection: &PgConnection, cookies: Option<&Cookie>) -> Vec<Profile> {
+pub fn read_profile(connection: &PgConnection, cookies: Option<Cookie>) -> Vec<Profile> {
     //postsテーブルからデータを読み取る。
 
     all_profile

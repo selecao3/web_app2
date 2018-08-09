@@ -1,12 +1,19 @@
 {% extends "Home" %}
 {% block content %}
 
+
+
+    <h1 class="display-4">ユーザー名</h1>
     <form action="/creater/user/setting" method="post" name="form2" id="id_form2" enctype="multipart/form-data">
         <div class="form-group">
 
             <label for="account">Your name</label>
             <input type="text" name="name" class="form-control" id="InputName" placeholder="Enter your account">
         </div>
+
+
+        <h1 class="display-4">紹介文</h1>
+
         <div class="form-group">
             <label for="text">Profile text</label>
             <textarea name="profile_text" class="form-control" id="profile_text" cols="30" rows="10">profile_text</textarea>
@@ -14,6 +21,25 @@
         {#    <button type="button" class="btn btn-primary">Signup!!</button>#}
         <input name="profile_img" type="file" accept="image/*">
         <br>
+        <h1 class="display-4">各ページのリンク</h1>
+        <div class="form-group">
+            <label for="account">ページへのリンク</label>
+            <input type="text" name="content01" class="form-control" id="InputName" placeholder="URLを入力">
+        </div>
+        <div class="form-group">
+            <label for="account">ページへのリンク</label>
+            <input type="text" name="content02" class="form-control" id="InputName" placeholder="URLを入力">
+        </div>
+        <div class="form-group">
+            <label for="account">ページへのリンク</label>
+            <input type="text" name="content03" class="form-control" id="InputName" placeholder="URLを入力">
+        </div>
+        <div class="form-group">
+            <label for="account">ページへのリンク</label>
+            <input type="text" name="content04" class="form-control" id="InputName" placeholder="URLを入力">
+        </div>
+
+
         <br>
         <input type="submit">
     </form>

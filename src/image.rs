@@ -46,7 +46,7 @@ struct PostImgForm{
 
 #[post("/form", data = "<data>")]
 // signature requires the request to have a `Content-Type`
-fn multipart_upload(cont_type: &ContentType, data: Data, conn:Connection, cookies:Cookies) -> Result<Redirect, Custom<String>> {
+fn multipart_upload(cont_type: &ContentType, data: Data, conn:Connection,mut cookies:Cookies) -> Result<Redirect, Custom<String>> {
     // this and the next check can be implemented as a request guard but it seems like just
     // more boilerplate than necessary
 
@@ -57,14 +57,15 @@ fn multipart_upload(cont_type: &ContentType, data: Data, conn:Connection, cookie
         )
     )?;
     //boundaryの取得
+    let cookie = cookies.get_private("account").clone();
 
-    match process_upload(boundary, data,conn,&cookies) {
-        Ok(resp) => Ok(Redirect::to(format!("/creater/account/{}",&cookies.get("account").unwrap().value()).as_str())),
+    match process_upload(boundary, data,conn,cookies) {
+        Ok(resp) => Ok(Redirect::to(format!("/creater/account/{}",cookie.unwrap().value()).as_str())),
         Err(err) => Err(Custom(Status::InternalServerError, err.to_string()))
     }
 }
 
-fn process_upload(boundary: &str, data: Data, conn:Connection, cookies:&Cookies) -> io::Result<Vec<u8>> {
+fn process_upload(boundary: &str, data: Data, conn:Connection, cookies:Cookies) -> io::Result<Vec<u8>> {
     let mut out = Vec::new();
     println!("process_upload関数");
 
@@ -73,7 +74,7 @@ fn process_upload(boundary: &str, data: Data, conn:Connection, cookies:&Cookies)
     // how the files are saved; Multipart would be a good impl candidate though
     match Multipart::with_body(data.open(), boundary).save().size_limit(None).with_dir("static/post_image"){
         //全てのフィールドを一旦保存する
-        Full(entries) => process_entries(entries, &mut out, conn,&cookies)?,
+        Full(entries) => process_entries(entries, &mut out, conn,cookies)?,
         //成功,entriesにはフィールドが全て詰まっている
         Partial(partial, reason) => {
             //途中で失敗した。
@@ -82,7 +83,7 @@ fn process_upload(boundary: &str, data: Data, conn:Connection, cookies:&Cookies)
                 writeln!(out, "Stopped on field: {:?}", field.source.headers)?;
             }
 
-            process_entries(partial.entries, &mut out, conn,&cookies)?
+            process_entries(partial.entries, &mut out, conn,cookies)?
         },
         Error(e) => return Err(e),
     }
@@ -105,7 +106,7 @@ use std::mem::replace;
 
 
 
-fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, cookies:&Cookies) -> io::Result<()>{
+fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, cookies:Cookies) -> io::Result<()>{
     {
 
         /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
@@ -143,7 +144,7 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, coo
             body:tmp[2].clone(),
             img_url_1:tmp[0].clone(),
         };
-        insert(t,&conn,&cookies);
+        insert(t,&conn,cookies);
 
 
         /*        let hoge = entries.save_dir;
@@ -167,15 +168,14 @@ use creater_setting;
 use creater_setting::profile;
 
 
-fn insert(postimgform:PostImgForm, conn: &PgConnection, cookies: &Cookies) -> bool{
+fn insert(postimgform:PostImgForm, conn: &PgConnection,mut cookies: Cookies) -> bool{
+    let cookie = cookies.get_private("account");
     let t = PostImg{
         id: None,
-        account: cookies.get("account").map(|c| c.value()).unwrap().to_string().clone(),
+        account: cookie.clone().unwrap().value().to_string().clone(),
         name: creater_setting::all_profile
-            .filter(creater_setting::profile::account.eq(cookies
-            .get("account")
+            .filter(creater_setting::profile::account.eq(cookie.unwrap().value()))
             //profileテーブルのそのユーザーのアカウントが入っている"行"を抽出する
-            .map(|c| c.value()).unwrap()))
             .select(name)
             //nameの列を抽出
             .first(conn).unwrap(),
@@ -191,10 +191,10 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection, cookies: &Cookies) -> bo
 use schema::profile::columns::name;
 
 
-    pub fn read_post_img(connection: &PgConnection, cookies:Option<&Cookie>) -> Vec<PostImg> {
+    pub fn read_post_img(connection: &PgConnection, cookies:Option<Cookie>) -> Vec<PostImg> {
     //postsテーブルからデータを読み取る。
     all_post_img
-        .filter(post_img::account.eq(cookies.map(|c| c.value()).unwrap()))
+        .filter(post_img::account.eq(cookies.unwrap().value()))
         //accountが◯◯のものを取り出す
         .order(post_img::id.desc())
         .load::<PostImg>(connection)

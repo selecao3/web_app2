@@ -22,6 +22,7 @@ use image::static_rocket_route_info_for_multipart_upload;
 use signup::static_rocket_route_info_for_signup_post;
 use creater_setting::static_rocket_route_info_for_multipart_user_setting;
 use signin::static_rocket_route_info_for_signin_post;
+use signout::static_rocket_route_info_for_signout_post;
 
 use rocket::http::RawStr;
 use rocket::response::Redirect;
@@ -36,6 +37,7 @@ mod signup;
 mod signin;
 mod creater_setting;
 mod schema;
+mod signout;
 
 
 #[derive(Serialize)]
@@ -90,10 +92,9 @@ fn user(connection: db::Connection, cookies:Cookies) -> Template {  // <- reques
 #[get("/creater/account/<account>", rank = 2)]              // <- route attribute
 fn user(connection: db::Connection, mut cookies:Cookies, account:String) -> Template {  // <- request handler
         //そのユーザー自身がユーザー自身のページに入ったとき
-    cookies.remove(Cookie::named("first"));
-    match cookies.get("account") {
+    match cookies.get_private("account") {
         Some(c) => if c.value() == account.as_str(){
-            return Template::render("profile",Context::row(&connection, &cookies))
+            return Template::render("profile",Context::row(&connection, cookies))
         }else {
             return Template::render("profile",Context::account_row(&connection, account))
         }
@@ -103,7 +104,7 @@ fn user(connection: db::Connection, mut cookies:Cookies, account:String) -> Temp
 }
 #[get("/creater/account/news")]              // <- route attribute
 fn news(connection: db::Connection, cookies:Cookies) -> Template {  // <- request handler
-    Template::render("news_creater",Context::row(&connection, &cookies))
+    Template::render("news_creater",Context::row(&connection, cookies))
 }
 
 //getメソッド群終わり
@@ -194,10 +195,10 @@ impl Context{
             user_lisence: false
         }
     }
-    fn row(connection: &db::Connection, cookies:&Cookies) -> Context{
+    fn row(connection: &db::Connection,mut cookies:Cookies) -> Context{
         //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
         //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
-        let aaa = cookies.get("account");
+        let aaa = cookies.get_private("account");
         Context{
             post_img: image::read_post_img(connection, aaa.clone()),
             profile:creater_setting::read_profile(&connection, aaa.clone()),
@@ -218,7 +219,7 @@ impl Context{
 
 #[get("/creater/account/new")]
 fn user_setting(connection: db::Connection, cookies:Cookies) -> Template {
-    Template::render("creater_setting", Context::row(&connection, &cookies))
+    Template::render("creater_setting", Context::row(&connection, cookies))
 }
 
 
@@ -260,7 +261,7 @@ fn main() {
     rocket::ignite()
         .mount("/", routes![
 home,about_me,signup,login,signup_post,multipart_user_setting,
-all,creater_static,files,creater,user_setting,profile_static,user,news,images,signin_post
+all,creater_static,files,creater,user_setting,profile_static,user,news,images,signin_post,signout_post
 ])
         .mount("/creater/account/post/", routes![multipart_upload])
         .manage(db::connect())
