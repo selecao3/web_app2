@@ -5,9 +5,10 @@
     <div class="page-header" id="banner">
         <div class="row my-4">
             <div class="col-12">
-                <h1 class="display-4" >同人誌サイト（仮）</h1>
+                <h1 class="display-3" >Creaters Board</h1>
+                <br>
                 <p class="lead">
-                    あなたのお気に入りの作家さんを見つけよう
+                    クリエイターとファンのためのサイト
                 </p>
             </div>
         </div>
@@ -23,21 +24,12 @@
         <div class="page-header">
             <h1 style="margin-bottom: 20px">Latest news</h1>
         </div>
-
-        <!--block-->
-
-
         <div class="bs-component">
             {% for i in post_img %}
             {{i.name}}さんがタイトル「<a href="/creater/account/{{ i.account }}"><b>{{i.title}}</b></a>」を投稿しました！
             <hr>
             {% endfor %}
         </div>
-        <!--block-->
-
-
     </div>
-    <!--block-->
-
 </div>
 {% endblock content %}

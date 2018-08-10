@@ -15,10 +15,6 @@ CREATE TABLE profile (
   account VARCHAR NOT NULL,
   profile_text TEXT NOT NULL,
   profile_img TEXT NOT NULL,
-  content01 VARCHAR,
-  content02 VARCHAR,
-  content03 VARCHAR,
-  content04 VARCHAR,
   regulation BOOLEAN NOT NULL DEFAULT 'f',
   created_day VARCHAR
 );

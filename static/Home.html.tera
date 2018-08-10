@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-        <title>同人誌サイト（仮）</title>
+        <title>Creaters Board</title>
 
   <link rel="stylesheet" type="text/css" href="dist/css/bootstrap.css">
    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script type="text/javascript" src="dist/js/bootstrap.js"></script>
 
 
 
@@ -66,14 +67,14 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/creater">creater</a>
+                    <a class="nav-link" href="/creater">Creaters</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/images">gallary</a>
+                    <a class="nav-link" href="/images">Gallary</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="http://github.com/windyakin/Honoka/wiki">about me</a>
+                    <a class="nav-link" href="http://github.com/windyakin/Honoka/wiki">About me</a>
                 </li>
                 <li class="nav-item">
                     <a href="/signup">
@@ -82,10 +83,10 @@
                         </button>
                     </a>
                 </li>
-
             </ul>
             {% block user_lisence %}
             {% endblock user_lisence %}
+
         </div>
     </div>
 </nav>

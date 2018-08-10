@@ -216,3 +216,7 @@ pub fn read_gallary(connection: &PgConnection) -> Vec<PostImg> {
         .load::<PostImg>(connection)
         .expect("error")
 }
+pub fn posts_delete(id:i32,connection: &PgConnection) -> bool {
+    //postsテーブルからデータを読み取る。
+     diesel::delete(all_post_img.find(id)).execute(connection).is_ok()
+}

@@ -27,10 +27,6 @@ table! {
         account -> Varchar,
         profile_text -> Text,
         profile_img -> Text,
-        content01 -> Varchar,
-        content02 -> Varchar,
-        content03 -> Varchar,
-        content04 -> Varchar,
         regulation -> Bool,
         created_day -> Varchar,
     }

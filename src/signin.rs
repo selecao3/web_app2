@@ -32,8 +32,7 @@ fn signin_post(mut cookies: Cookies, user: Form<SigninForm>, connection: db::Con
     println!("post");
     if check(&connection, &cookies, t.clone()){
         let mut cookie = Cookie::new("account",t.account_flag.clone());
-        &cookie.set_path("/creater");
-        cookies.add(cookie);
+        cookies.add_private(cookie);
         println!("成功");
         return Flash::success(Redirect::to(format!("/creater/account/{}",t.account_flag).as_str()), "成功してる")
     }else {

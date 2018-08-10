@@ -21,6 +21,7 @@ use chrono_tz::Tz;
 
 pub const Japan: Tz = Tz::Japan;
 
+use comrak::{markdown_to_html, ComrakOptions};
 
 pub use schema::profile;
 pub use schema::profile::dsl::{profile as all_profile , regulation as profile_regulation};
@@ -33,10 +34,6 @@ pub struct Profile{
     account: String,
     profile_text: String,
     profile_img : String,
-    content01: String,
-    content02: String,
-    content03: String,
-    content04: String,
     regulation: bool,
     created_day:String
 
@@ -47,10 +44,6 @@ struct ProfileForm{
     name: String,
     profile_text: String,
     profile_img: String,
-    content01: String,
-    content02: String,
-    content03: String,
-    content04: String,
     /*    regulation: bool,*/
 }
 
@@ -147,18 +140,20 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection,mut 
         }
         if let SavedData::Text(profile_string) = profile_text{
             println!("{}",profile_string);
-            tmp.push(profile_string.to_string());
+            let html = markdown_to_html(profile_string, &ComrakOptions::default());
+            println!("{}",html);
+            tmp.push(html.to_string());
         }
-        for i in 1..5 {
+/*        for i in 1..5 {
             println!("======");
-/*            let content = match &entries.fields.get(&format!("content0{}",i)){
+*//*            let content = match &entries.fields.get(&format!("content0{}",i)){
                 Some(con) => match &con.get(0){
                     Some(con) => &con.data |c| SavedData::Text(cont) = c{
                     },
                     None => {{continue}}
                 }
                 None =>{{continue}}
-            };*/
+            };*//*
             //breakのせいでif文にはいっていない
             //continueだとif文に入る前にfor文を繰り返す。
 
@@ -182,17 +177,13 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection,mut 
             }
             //この時点で空欄のものと何かしらの値が入ったものにわけられている。
             //空欄ならば「空文字を代入する」という考え方
-        }
+        }*/
 
 
         let t = ProfileForm{
             profile_img:tmp[0].clone(),
             name:tmp[1].clone(),
             profile_text:tmp[2].clone(),
-            content01:tmp[3].clone(),
-            content02:tmp[4].clone(),
-            content03:tmp[5].clone(),
-            content04:tmp[6].clone(),
         };
 
 
@@ -230,10 +221,6 @@ fn update(profile:ProfileForm, conn: &PgConnection,mut cookies: Cookies) -> bool
         name:profile.name,
         profile_text: profile.profile_text,
         profile_img: profile.profile_img,
-        content01: profile.content01,
-        content02: profile.content02,
-        content03: profile.content03,
-        content04: profile.content04,
         //保存したimg_urlをどうにかしてPost structへ・・・
         regulation: false,
         created_day: Local::now().with_timezone(&Japan).to_rfc3339()
@@ -246,10 +233,6 @@ fn update(profile:ProfileForm, conn: &PgConnection,mut cookies: Cookies) -> bool
             profile::profile_text.eq(&t.profile_text),
             profile::profile_img.eq(&t.profile_img),
             profile::created_day.eq(&t.created_day),
-            profile::content01.eq(&t.content01),
-            profile::content02.eq(&t.content02),
-            profile::content03.eq(&t.content03),
-            profile::content04.eq(&t.content04),
         )
         )
         .execute(conn)
@@ -266,10 +249,6 @@ fn insert(profile:ProfileForm, conn: &PgConnection,mut cookies: Cookies) -> bool
         name:profile.name,
         profile_text: profile.profile_text,
         profile_img: profile.profile_img,
-        content01: profile.content01,
-        content02: profile.content02,
-        content03: profile.content03,
-        content04: profile.content04,
         //保存したimg_urlをどうにかしてPost structへ・・・
         regulation: false,
         created_day: Local::now().with_timezone(&Japan).to_rfc3339()

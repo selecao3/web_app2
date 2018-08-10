@@ -18,7 +18,7 @@ extern crate chrono_tz;
 
 
 
-use image::static_rocket_route_info_for_multipart_upload;
+use news_posts::static_rocket_route_info_for_multipart_upload;
 use signup::static_rocket_route_info_for_signup_post;
 use creater_setting::static_rocket_route_info_for_multipart_user_setting;
 use signin::static_rocket_route_info_for_signin_post;
@@ -31,7 +31,7 @@ use rocket_contrib::Template;
 use diesel::pg::PgConnection;
 
 
-mod image;
+mod news_posts;
 mod db;
 mod signup;
 mod signin;
@@ -151,7 +151,7 @@ use diesel::prelude::*;
 
 #[derive(Debug,Serialize)]
 struct Context{
-    post_img: Vec<image::PostImg>,
+    post_img: Vec<news_posts::PostImg>,
     profile: Vec<creater_setting::Profile>,
     user_lisence: bool
     //user_lisenceがfalse == そのページの所有者とそのユーザーは一致しない。
@@ -190,7 +190,7 @@ impl Context{
         //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
         //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
         Context{
-            post_img: image::read_gallary(&connection),
+            post_img: news_posts::read_gallary(&connection),
             profile:creater_setting::read_profiles_all(&connection),
             user_lisence: false
         }
@@ -200,7 +200,7 @@ impl Context{
         //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
         let aaa = cookies.get_private("account");
         Context{
-            post_img: image::read_post_img(connection, aaa.clone()),
+            post_img: news_posts::read_post_img(connection, aaa.clone()),
             profile:creater_setting::read_profile(&connection, aaa.clone()),
             user_lisence: true
         }
@@ -209,7 +209,7 @@ impl Context{
         //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
         //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
         Context{
-            post_img: image::read_post_img_normal(connection, account.clone()),
+            post_img: news_posts::read_post_img_normal(connection, account.clone()),
             profile:creater_setting::read_profile_normal(&connection, account.clone()),
             user_lisence: false
         }
@@ -226,6 +226,14 @@ fn user_setting(connection: db::Connection, cookies:Cookies) -> Template {
 #[get("/images")]              // <- route attribute
 fn images(connection: db::Connection) -> Template {  // <- request handler
     Template::render("gallary", Context::row_image(&connection))
+}
+#[delete("/creater/account/delete/<id>")]
+fn delete(mut cookie:Cookies, id: i32, conn: db::Connection) -> Result<Flash<Redirect>, ()> {
+    if news_posts::posts_delete(id, &conn) {
+        Ok(Flash::success(Redirect::to(format!("/creater/account/{}",cookie.get_private("account").unwrap().value()).as_str()), "Todo was deleted."))
+    } else {
+        Err(())
+    }
 }
 
 
@@ -261,7 +269,7 @@ fn main() {
     rocket::ignite()
         .mount("/", routes![
 home,about_me,signup,login,signup_post,multipart_user_setting,
-all,creater_static,files,creater,user_setting,profile_static,user,news,images,signin_post,signout_post
+all,creater_static,files,creater,user_setting,profile_static,user,news,images,signin_post,signout_post,delete
 ])
         .mount("/creater/account/post/", routes![multipart_upload])
         .manage(db::connect())

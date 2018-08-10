@@ -38,27 +38,12 @@
         <div class="card-body" id="change_to_form">
             <p class="card-text" id="Text01">
                 <span style="font-style: italic" id="Text02">
-                    <pre>{{ i.profile_text }}</pre>
+                    <pre class="lead">{{ i.profile_text|safe }}</pre>
                 </span>
             </p>
         </div>
 
 
-<ul class="list-group list-group-flush">
-    <li class="list-group-item">
-        <a href="{{ i.content01 }}">ツイッター</a>
-    </li>
-    <li class="list-group-item">
-        <a href="{{ i.content02 }}">名工大</a>
-
-    </li>
-    <li class="list-group-item">
-        {{ i.content03 }}
-    </li>
-    <li class="list-group-item">
-        {{ i.content04 }}
-    </li>
-</ul>
 <div class="card-footer text-muted">
     最終更新日時
     <br>{{ i.created_day|date(format="%Y年%m月%d日 %H時%M分") }}
@@ -75,25 +60,45 @@
 
         {% for i in post_img %}
 
-            <div class="jumbotron" style="width: 900px">
+            <div class="jumbotron" style="width: 800px">
                 <h3 class="display-4">{{ i.title }}</h3>
-                <p class="lead">{{ i.body| safe }}</p>
-                <p class="lead">
-                    <a href="{{ i.img_url_1 }}" target="_blank">
-                        <img style="width: 300px" src="{{ i.img_url_1 }}" alt="">
-                    </a>
-                </p>
+                <hr>
+                <p>{{ i.body| safe }}</p>
+                <a href="{{ i.img_url_1 }}" target="_blank">
+                    <img style="height: 200px" src="{{ i.img_url_1 }}" alt="">
+                </a>
+                {% if user_lisence == true %}
+                    <form action="/creater/account/delete/{{ i.id }}" method="post">
+                        <input type="hidden" name="_method" value="delete" placeholder="delete!!" class="btn-dark btn">
+                        <input type="submit" class="btn btn-dark" placeholder="delete!!">
+                    </form>
+                {% endif %}
+
             </div>
+
+            <a class="btn btn-primary btn-lg" href="#" role="button">もっと詳しく</a>
+
         {% endfor %}
     </div>
-    <a href="/creater/profile/signout">hoge</a>
+
 
 {% endblock content %}
 {% block user_lisence %}
     {% if user_lisence == true %}
         <div class="page-header">
-            <a href="/creater/account/news"><button type="button" class="btn btn-success" style="margin-left: 500px;font-size: 24px">投稿する！</button></a>
+            <a href="/creater/account/news">
+                <button type="button" class="btn btn-success" style="float: right;font-size: 24px">投稿する！</button>
+            </a>
         </div>
+        <div class="page-header">
+            <a href="/creater/profile/signout">
+                <button type="button" class="btn btn-dark">ログアウト</button>
+            </a>
+        </div>
+
+
+
+
     {% endif %}
 {% endblock user_lisence %}
 
