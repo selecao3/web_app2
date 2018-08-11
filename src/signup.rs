@@ -11,7 +11,7 @@ use rocket::response::Redirect;
 use std::env;
 
 use db;
-
+use creater_setting;
 
 
 pub use schema::creater;
@@ -68,6 +68,8 @@ fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> boo
     };
     let mut cookie_account = Cookie::new("account",t.clone().account);
     cookies.add_private(cookie_account.clone());
+
+    creater_setting::insert(conn,cookies);
     diesel::insert_into(creater::table).values(&t).execute(conn).is_ok()
     //account or mail_addressがDB上で同じだとFalse
 

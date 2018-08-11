@@ -109,6 +109,7 @@ use std::mem::replace;
 fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, cookies:Cookies) -> io::Result<()>{
     {
 
+        println!("{:?}",&entries.fields);
         /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
         let file_data = &entries.fields.get(&"file".to_string()).unwrap().get(0).unwrap().data;
         let title_data = &entries.fields.get(&"title".to_string()).unwrap().get(0).unwrap().data;

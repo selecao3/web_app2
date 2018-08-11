@@ -1,26 +1,31 @@
 {% extends "Home" %}
 {% block content %}
 
-    <h1 class="lead">記事の投稿</h1>
-    <form action="/creater/account/post/form" method="post" name="form2" id="id_form2" enctype="multipart/form-data">
-        <div class="jumbotron">
 
-            <fieldset>
-                <h3 class="display-4">
-                    <input type="text" name="title" id="title" placeholder="タイトル" style="width: 100%">
-                </h3>
-                <textarea class="lead" name="body" id="body" rows="10" placeholder="本文" style="width: 100%"></textarea>
-            </fieldset>
-            <br>
-            <label for="image_file">
+        <form action="/creater/account/post/form" method="post" name="form2" id="id_form2" enctype="multipart/form-data">
+            <h1>記事の投稿</h1>
+            <div class="jumbotron" style="width: 100%;">
+
+                <fieldset>
+                    <h3 class="display-4">
+                        <input type="text" name="title" id="title" placeholder="タイトル" style="width: 100%">
+                    </h3>
+                    <textarea class="lead" name="body" id="body" rows="10" placeholder="本文" style="width: 100%"></textarea>
+                </fieldset>
+                <br>
+                <label for="image_file">
             <span class="btn btn-dark">
                 ファイルを選択
-                <input style="display: none" id="image_file" name="file" type="file" accept="image/*">
+                <input style="display: none" id="image_file" name="file[]" type="file" accept="image/*">
+
+                <!--name="hogehoge[]"で複数のファイルのアップロードが可能に-->
             </span>
-            </label>
-            <br>
-            <input class="btn btn-dark" type="submit" placeholder="送信">
-        </div>
-    </form>
+                </label>
+                <input id="image_file" name="file[]" type="file" accept="image/*">
+                <br>
+                <input class="btn btn-dark" type="submit" placeholder="送信">
+            </div>
+        </form>
+
 
 {% endblock content %}

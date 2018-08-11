@@ -7,7 +7,7 @@
         <title>Creaters Board</title>
 
   <link rel="stylesheet" type="text/css" href="dist/css/bootstrap.css">
-   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script type="text/javascript" src="dist/js/bootstrap.js"></script>
 
 
@@ -69,13 +69,22 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/creater">Creaters</a>
                 </li>
-
                 <li class="nav-item">
                     <a class="nav-link" href="/images">Gallary</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="http://github.com/windyakin/Honoka/wiki">About me</a>
                 </li>
+
+                {% if user_lisence == true %}
+                    <li class="nav-item">
+                        <div class="page-header">
+                            <a href="/creater/profile/signout">
+                                <button type="button" class="btn btn-dark">ログアウト</button>
+                            </a>
+                        </div>
+                    </li>
+                    {% else %}
                 <li class="nav-item">
                     <a href="/signup">
                         <button type="button" class="btn btn-secondary">
@@ -83,6 +92,8 @@
                         </button>
                     </a>
                 </li>
+                {% endif %}
+
             </ul>
             {% block user_lisence %}
             {% endblock user_lisence %}
@@ -104,6 +115,7 @@
         </div>
     </div>
 </div>
+
 
 
 

@@ -43,7 +43,11 @@ mod signout;
 #[derive(Serialize)]
 struct TemplateRenderTest{
     name: String,
+}
 
+#[derive(Serialize)]
+struct UserCookies{
+    user_lisence: String,
 }
 //テンプレートファイルに渡すstruct
 
@@ -64,20 +68,34 @@ fn about_me() -> Template {  // <- request handler
 }
 
 #[get("/signup")]              // <- route attribute
-fn signup() -> Template {  // <- request handler
-    let context = TemplateRenderTest{
-        name: "name".to_string()
-        //nameという文字列がHome.html.teraの{{name}}に渡される
-    };
-    Template::render("sign_up", &context)
+fn signup(mut cookie: Cookies) -> Template {  // <- request handler
+    if let Some(cook) = cookie.get_private("account"){
+        let cookie_true = cook.value().to_string();
+        let context = UserCookies{
+            user_lisence: cookie_true
+        };
+        return Template::render("sign_up", &context)
+    }else {
+        let context = UserCookies{
+            user_lisence: "".to_string()
+        };
+        return Template::render("sign_up", &context)
+    }
 }
 #[get("/login")]              // <- route attribute
-fn login() -> Template {  // <- request handler
-    let context = TemplateRenderTest{
-        name: "name".to_string()
-        //nameという文字列がHome.html.teraの{{name}}に渡される
-    };
-    Template::render("signin", &context)
+fn login(mut cookie:Cookies) -> Template {  // <- request handler
+    if let Some(cook) = cookie.get_private("account"){
+        let cookie_true = cook.value().to_string();
+        let context = UserCookies{
+            user_lisence: cookie_true
+        };
+        return Template::render("signin", &context)
+    }else {
+        let context = UserCookies{
+            user_lisence: "".to_string()
+        };
+        return Template::render("signin", &context)
+    }
 }
 
 
@@ -91,7 +109,7 @@ fn user(connection: db::Connection, cookies:Cookies) -> Template {  // <- reques
 }*/
 #[get("/creater/account/<account>", rank = 2)]              // <- route attribute
 fn user(connection: db::Connection, mut cookies:Cookies, account:String) -> Template {  // <- request handler
-        //そのユーザー自身がユーザー自身のページに入ったとき
+    //そのユーザー自身がユーザー自身のページに入ったとき
     match cookies.get_private("account") {
         Some(c) => if c.value() == account.as_str(){
             return Template::render("profile",Context::row(&connection, cookies))
@@ -183,8 +201,6 @@ fn files(path: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("static/post_image").join(path)).ok()
 }
 
-
-
 impl Context{
     fn row_image(connection: &db::Connection) -> Context{
         //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
@@ -236,30 +252,38 @@ fn delete(mut cookie:Cookies, id: i32, conn: db::Connection) -> Result<Flash<Red
     }
 }
 
-
-
-
-
 /*#[get("/creater/<account>")]              // <- route attribute
 fn creater(account: User, connection: db::Connection) -> Template {  // <- request handler
     Template::render("creater_1", Context::row(&connection))
 }*/
 
 #[get("/creater")]              // <- route attribute
-fn creater(connection: db::Connection) -> Template {  // <- request handler
-    Template::render("creaters", ProfileContext::row(&connection))
+fn creater(mut cookie:Cookies,connection: db::Connection) -> Template {  // <- request handler
+    Template::render("creaters", ProfileContext::row(cookie, &connection))
 }
 
 //profile郡
 #[derive(Debug,Serialize)]
 struct ProfileContext{
-    profile: Vec<creater_setting::Profile>
+    profile: Vec<creater_setting::Profile>,
+    user_lisence:String
 }
 
 impl ProfileContext{
-    fn row(connection: &db::Connection) -> ProfileContext{
-        ProfileContext{
-            profile:creater_setting::read_profiles_all(&connection)
+    fn row(mut cookie:Cookies,connection: &db::Connection) -> ProfileContext{
+        if let Some(cook) = cookie.get_private("account"){
+            let cookie_true = cook.value().to_string();
+            let profile = ProfileContext{
+                profile:creater_setting::read_profiles_all(&connection),
+                user_lisence: cookie_true
+            };
+            return profile
+        }else {
+            let profile = ProfileContext{
+                profile:creater_setting::read_profiles_all(&connection),
+                user_lisence: "".to_string()
+            };
+            return profile
         }
     }
 }

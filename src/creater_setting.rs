@@ -140,9 +140,7 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection,mut 
         }
         if let SavedData::Text(profile_string) = profile_text{
             println!("{}",profile_string);
-            let html = markdown_to_html(profile_string, &ComrakOptions::default());
-            println!("{}",html);
-            tmp.push(html.to_string());
+            tmp.push(profile_string.to_string());
         }
 /*        for i in 1..5 {
             println!("======");
@@ -188,11 +186,12 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection,mut 
 
 
         //データがダブっていたら死ぬ（バグ）
-        if read_profile(&conn, cookies.get_private("account")).is_empty(){
+/*        if read_profile(&conn, cookies.get_private("account")).is_empty(){
             insert(t,&conn, cookies);
         }else {
             update(t, &conn,cookies);
-        }
+        }*/
+        update(t, &conn,cookies);
 
 
         /*        let hoge = entries.save_dir;
@@ -210,7 +209,22 @@ use diesel::pg::PgConnection;
 use diesel;
 use diesel::prelude::*;
 
+//signup時のみ呼ばれる関数。初期値をセットする。
+pub fn insert(conn: &PgConnection,mut cookies: Cookies) -> bool{
+    println!("insertメソッド");
 
+    let t = Profile{
+        id: None,
+        account:cookies.get_private("account").unwrap().value().to_string(),
+        name:"".to_string(),
+        profile_text: "".to_string(),
+        profile_img: "".to_string(),
+        //保存したimg_urlをどうにかしてPost structへ・・・
+        regulation: false,
+        created_day: Local::now().with_timezone(&Japan).to_rfc3339()
+    };
+    diesel::insert_into(profile::table).values(&t).execute(conn).is_ok()
+}
 
 fn update(profile:ProfileForm, conn: &PgConnection,mut cookies: Cookies) -> bool{
     println!("updateメソッド");
@@ -240,21 +254,7 @@ fn update(profile:ProfileForm, conn: &PgConnection,mut cookies: Cookies) -> bool
 }
 
 
-fn insert(profile:ProfileForm, conn: &PgConnection,mut cookies: Cookies) -> bool{
-    println!("insertメソッド");
 
-    let t = Profile{
-        id: None,
-        account:cookies.get_private("account").unwrap().value().to_string(),
-        name:profile.name,
-        profile_text: profile.profile_text,
-        profile_img: profile.profile_img,
-        //保存したimg_urlをどうにかしてPost structへ・・・
-        regulation: false,
-        created_day: Local::now().with_timezone(&Japan).to_rfc3339()
-    };
-    diesel::insert_into(profile::table).values(&t).execute(conn).is_ok()
-}
 
 use rocket::http::Cookie;
 
