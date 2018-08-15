@@ -6,6 +6,9 @@ CREATE TABLE post_img (
   title VARCHAR NOT NULL,
   body TEXT NOT NULL,
   img_url_1 TEXT,
+  img_url_2 TEXT,
+  img_url_3 TEXT,
+  img_url_4 TEXT,
   regulation BOOLEAN NOT NULL DEFAULT 'f'
 );
 -- userは予約語なので不可

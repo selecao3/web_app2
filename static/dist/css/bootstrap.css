@@ -4697,7 +4697,7 @@ tbody.collapse.show {
 
 @media (min-width: 576px) {
   .jumbotron {
-    padding: 4rem 2rem;
+    padding: 1rem 2rem;
   }
 }
 
@@ -5283,7 +5283,8 @@ button.close {
 
 @media (min-width: 576px) {
   .modal-dialog {
-    max-width: 500px;
+/*    max-width: 500px;*/
+    max-width: 800px;
     margin: 1.75rem auto;
   }
   .modal-dialog-centered {

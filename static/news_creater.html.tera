@@ -16,12 +16,10 @@
                 <label for="image_file">
             <span class="btn btn-dark">
                 ファイルを選択
-                <input style="display: none" id="image_file" name="file[]" type="file" accept="image/*">
-
+                <input style="display: none" id="image_file" name="file[]" type="file" accept="image/*" multiple="multiple">
                 <!--name="hogehoge[]"で複数のファイルのアップロードが可能に-->
             </span>
                 </label>
-                <input id="image_file" name="file[]" type="file" accept="image/*">
                 <br>
                 <input class="btn btn-dark" type="submit" placeholder="送信">
             </div>

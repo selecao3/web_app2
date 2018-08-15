@@ -31,6 +31,9 @@ pub struct PostImg {
     title: String,
     body: String,
     img_url_1: String,
+    img_url_2: String,
+    img_url_3: String,
+    img_url_4: String,
     regulation: bool
 }
 
@@ -39,6 +42,9 @@ struct PostImgForm{
     title: String,
     body: String,
     img_url_1: String,
+    img_url_2: String,
+    img_url_3: String,
+    img_url_4: String,
     /*    regulation: bool,*/
 }
 
@@ -109,26 +115,50 @@ use std::mem::replace;
 fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, cookies:Cookies) -> io::Result<()>{
     {
 
-        println!("{:?}",&entries.fields);
         /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
-        let file_data = &entries.fields.get(&"file".to_string()).unwrap().get(0).unwrap().data;
+/*        let file_data = &entries.fields.get(&"file".to_string()).unwrap().get(0).unwrap().data;*/
         let title_data = &entries.fields.get(&"title".to_string()).unwrap().get(0).unwrap().data;
         let body_data = &entries.fields.get(&"body".to_string()).unwrap().get(0).unwrap().data;
 
         let mut tmp:Vec<String> = Vec::new();
 
-        if let SavedData::File(bbb,ccc) = file_data{
-            println!("{:?}", bbb);
-             let mut s = bbb.to_str().unwrap().to_string();
-            s.push_str(".png");
-            rename(bbb.to_str().unwrap(),s.trim() ).unwrap();
-            println!("{}",s.trim_left_matches("static/").to_string());
-            //file名を*.pngに変更している.
-            let file_path = s.trim_left_matches("static/").to_string();
-
-            tmp.push(file_path);
-
+        for i in 0..4 {
+            if let Some(file_data) = &entries.fields.get(&"file[]".to_string()){
+                if let Some(file) = file_data.get(i){
+                    //fileがuploadされた時
+                    if let SavedData::File(bbb,ccc) = &file.data{
+                        println!("{:?}", bbb);
+                        let mut s = bbb.to_str().unwrap().to_string();
+                        s.push_str(".png");
+                        rename(bbb.to_str().unwrap(),s.trim()).unwrap();
+                        println!("{}",&s.trim_left_matches("static/").to_string());
+                        //file名を*.pngに変更している.
+                        let file_path = s.trim_left_matches("static/").to_string();
+                        tmp.push(file_path);
+                    }else {
+                        //そもそもfileがuploadされなかった時。
+                        tmp.push("".to_string());
+                    }
+                }else {
+                    //4つのうちいくつかがuploadされなかった時
+                    tmp.push("".to_string());
+                }
+            }
         }
+
+
+        /*        if let SavedData::File(bbb,ccc) = file_data{
+                    println!("{:?}", bbb);
+                    let mut s = bbb.to_str().unwrap().to_string();
+                    s.push_str(".png");
+                    rename(bbb.to_str().unwrap(),s.trim() ).unwrap();
+                    println!("{}",s.trim_left_matches("static/").to_string());
+                    //file名を*.pngに変更している.
+                    let file_path = s.trim_left_matches("static/").to_string();
+
+                    tmp.push(file_path);
+
+                }*/
         if let SavedData::Text(title_string) = title_data{
             println!("{}",title_string);
             tmp.push(title_string.to_string());
@@ -141,9 +171,12 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, coo
             tmp.push(html);
         }
         let t = PostImgForm{
-            title:tmp[1].clone(),
-            body:tmp[2].clone(),
+            title:tmp[4].clone(),
+            body:tmp[5].clone(),
             img_url_1:tmp[0].clone(),
+            img_url_2:tmp[1].clone(),
+            img_url_3:tmp[2].clone(),
+            img_url_4:tmp[3].clone(),
         };
         insert(t,&conn,cookies);
 
@@ -184,6 +217,9 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection,mut cookies: Cookies) -> 
         title:postimgform.title,
         body: postimgform.body,
         img_url_1: postimgform.img_url_1,
+        img_url_2: postimgform.img_url_2,
+        img_url_3: postimgform.img_url_3,
+        img_url_4: postimgform.img_url_4,
         //保存したimg_urlをどうにかしてPost structへ・・・
         regulation: false
     };
@@ -192,7 +228,7 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection,mut cookies: Cookies) -> 
 use schema::profile::columns::name;
 
 
-    pub fn read_post_img(connection: &PgConnection, cookies:Option<Cookie>) -> Vec<PostImg> {
+pub fn read_post_img(connection: &PgConnection, cookies:Option<Cookie>) -> Vec<PostImg> {
     //postsテーブルからデータを読み取る。
     all_post_img
         .filter(post_img::account.eq(cookies.unwrap().value()))
@@ -219,5 +255,5 @@ pub fn read_gallary(connection: &PgConnection) -> Vec<PostImg> {
 }
 pub fn posts_delete(id:i32,connection: &PgConnection) -> bool {
     //postsテーブルからデータを読み取る。
-     diesel::delete(all_post_img.find(id)).execute(connection).is_ok()
+    diesel::delete(all_post_img.find(id)).execute(connection).is_ok()
 }

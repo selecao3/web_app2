@@ -16,6 +16,9 @@ table! {
         title -> Varchar,
         body -> Text,
         img_url_1 -> Text,
+        img_url_2 -> Text,
+        img_url_3 -> Text,
+        img_url_4 -> Text,
         regulation -> Bool,
     }
 }
