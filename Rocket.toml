@@ -1,2 +1,6 @@
 [global]
 template_dir = "static"
+
+[development]
+address = "59.106.213.97"
+port = 8000
