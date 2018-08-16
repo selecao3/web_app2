@@ -47,14 +47,21 @@ struct TemplateRenderTest{
 
 #[derive(Serialize)]
 struct UserCookies{
-    user_lisence: String,
+    user_lisence: bool,
 }
 //テンプレートファイルに渡すstruct
 
 //getメソッド群
 #[get("/")]
-fn home(conn:db::Connection) -> Template{
-    Template::render("news", Context::row_image(&conn))
+fn home(conn:db::Connection, mut cookie:Cookies) -> Template{
+    if let Some(cook) = cookie.get_private("account"){
+        let mut context = Context::row_image(&conn);
+        let context = Context{user_lisence:true, .. context};
+
+        return Template::render("news", &context)
+    }else {
+        return Template::render("news", Context::row_image(&conn));
+    }
 }
 
 
@@ -70,14 +77,13 @@ fn about_me() -> Template {  // <- request handler
 #[get("/signup")]              // <- route attribute
 fn signup(mut cookie: Cookies) -> Template {  // <- request handler
     if let Some(cook) = cookie.get_private("account"){
-        let cookie_true = cook.value().to_string();
         let context = UserCookies{
-            user_lisence: cookie_true
+            user_lisence: true
         };
         return Template::render("sign_up", &context)
     }else {
         let context = UserCookies{
-            user_lisence: "".to_string()
+            user_lisence: false
         };
         return Template::render("sign_up", &context)
     }
@@ -85,14 +91,13 @@ fn signup(mut cookie: Cookies) -> Template {  // <- request handler
 #[get("/login")]              // <- route attribute
 fn login(mut cookie:Cookies) -> Template {  // <- request handler
     if let Some(cook) = cookie.get_private("account"){
-        let cookie_true = cook.value().to_string();
         let context = UserCookies{
-            user_lisence: cookie_true
+            user_lisence: true
         };
         return Template::render("signin", &context)
     }else {
         let context = UserCookies{
-            user_lisence: "".to_string()
+            user_lisence: false
         };
         return Template::render("signin", &context)
     }
@@ -240,8 +245,15 @@ fn user_setting(connection: db::Connection, cookies:Cookies) -> Template {
 
 
 #[get("/images")]              // <- route attribute
-fn images(connection: db::Connection) -> Template {  // <- request handler
-    Template::render("gallary", Context::row_image(&connection))
+fn images(connection: db::Connection,mut cookie:Cookies) -> Template {  // <- request handler
+    if let Some(cook) = cookie.get_private("account"){
+        let mut context = Context::row_image(&connection);
+        let context = Context{user_lisence:true, .. context};
+
+        return Template::render("gallary", &context)
+    }else {
+        return Template::render("gallary", Context::row_image(&connection));
+    }
 }
 #[delete("/creater/account/delete/<id>")]
 fn delete(mut cookie:Cookies, id: i32, conn: db::Connection) -> Result<Flash<Redirect>, ()> {
@@ -266,22 +278,21 @@ fn creater(mut cookie:Cookies,connection: db::Connection) -> Template {  // <- r
 #[derive(Debug,Serialize)]
 struct ProfileContext{
     profile: Vec<creater_setting::Profile>,
-    user_lisence:String
+    user_lisence:bool
 }
 
 impl ProfileContext{
     fn row(mut cookie:Cookies,connection: &db::Connection) -> ProfileContext{
         if let Some(cook) = cookie.get_private("account"){
-            let cookie_true = cook.value().to_string();
             let profile = ProfileContext{
                 profile:creater_setting::read_profiles_all(&connection),
-                user_lisence: cookie_true
+                user_lisence: true
             };
             return profile
         }else {
             let profile = ProfileContext{
                 profile:creater_setting::read_profiles_all(&connection),
-                user_lisence: "".to_string()
+                user_lisence: false
             };
             return profile
         }
