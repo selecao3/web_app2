@@ -3,16 +3,14 @@
 
 
     {% for pro in profile%}
-        <h1 class="display-4">ユーザー名</h1>
         <form action="/creater/user/setting" method="post" name="form2" id="id_form2" enctype="multipart/form-data">
             <div class="form-group">
                 <label for="account">アカウント名</label>
                 <input type="text" name="name" class="form-control" id="InputName" placeholder="{{ pro.name }}">
             </div>
-            <h1 class="display-4">紹介文</h1>
 
             <div class="form-group">
-                <label for="text">Profile text</label>
+                <label for="text">紹介文</label>
                 <textarea name="profile_text" class="form-control" id="profile_text" cols="30" rows="10">{{ pro.profile_text }}</textarea>
             </div>
             {#    <button type="button" class="btn btn-primary">Signup!!</button>#}

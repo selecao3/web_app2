@@ -36,7 +36,7 @@ fn signin_post(mut cookies: Cookies, user: Form<SigninForm>, connection: db::Con
         println!("成功");
         return Flash::success(Redirect::to(format!("/creater/account/{}",t.account_flag).as_str()), "成功してる")
     }else {
-        return Flash::error(Redirect::to("/"), "miss")
+        return Flash::error(Redirect::to("/login"), "アカウントまたはパスワードが間違っています。")
     }
 
 }
@@ -52,14 +52,21 @@ use schema::profile::columns::account;
 use schema::creater::columns::password;
 
 fn check(conn: &PgConnection, mut cookies: &Cookies, signin:SigninForm) -> bool {
-    let pass:String = signup::all_creater
+    let pass:String = match signup::all_creater
         //型をStringとしないと、&str型になる。
         //返り値はString型であるにもかかわらず、変数は&str型なので一致せずにエラー。
         .filter(signup::creater::account.eq(signin.account_flag.as_str()))
         .select(password)
-        .first(conn).unwrap();
+        .first(conn){
+        Ok(p) => p,
+        Err(e) => "".to_string()
+    };
     println!("{}",pass);
-    bcrypt::verify(signin.password_flag.as_str(), pass.as_str()).unwrap()
+    println!("{}",signin.password_flag.as_str());
+    match bcrypt::verify(signin.password_flag.as_str(), pass.as_str()){
+        Ok(pw) => true,
+        Err(e) => false
+    }
 }
 pub fn read_user(connection: &PgConnection) -> Vec<Signup> {
     //postsテーブルからデータを読み取る。

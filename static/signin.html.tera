@@ -2,6 +2,7 @@
 {% block content %}
 
     <!--1ブロック分-->
+
     <h1 class="display-4">サインイン</h1>
     <div style="margin-top: 50px">
         <form action="/creater/profile/signin" method="post" >
@@ -12,7 +13,11 @@
             <div class="form-group">
                 <label for="password">パスワード</label>
                 <input type="password" name="password_flag" class="form-control" id="InputPassword" placeholder="Password">
+                {% if message %}
+                <div class="invalid-feedback">{{ message }}</div>
+            {% endif %}
             </div>
+
             <input type="submit">
             {#    <button type="button" class="btn btn-primary">Signup!!</button>#}
         </form>

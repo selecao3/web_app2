@@ -65,14 +65,6 @@ fn home(conn:db::Connection, mut cookie:Cookies) -> Template{
 }
 
 
-#[get("/about_me")]              // <- route attribute
-fn about_me() -> Template {  // <- request handler
-    let context = TemplateRenderTest{
-        name: "name".to_string()
-        //nameという文字列がHome.html.teraの{{name}}に渡される
-    };
-    Template::render("about_me", &context)
-}
 
 #[get("/signup")]              // <- route attribute
 fn signup(mut cookie: Cookies) -> Template {  // <- request handler
@@ -88,21 +80,53 @@ fn signup(mut cookie: Cookies) -> Template {  // <- request handler
         return Template::render("sign_up", &context)
     }
 }
+
+
+#[derive(Debug,Serialize)]
+struct LoginMsg{
+    user_lisence:bool,
+    message: String
+}
+
+
+use rocket::request::FlashMessage;
 #[get("/login")]              // <- route attribute
-fn login(mut cookie:Cookies) -> Template {  // <- request handler
+fn login(msg:Option<FlashMessage>,mut cookie:Cookies) -> Template {  // <- request handler
+    let m = match msg {
+        Some(m) => m.msg().to_string(),
+        None => "".to_string()
+    };
+    println!("{}",m);
+
     if let Some(cook) = cookie.get_private("account"){
-        let context = UserCookies{
-            user_lisence: true
+        let context = LoginMsg{
+            user_lisence: true,
+            message: m
         };
         return Template::render("signin", &context)
     }else {
-        let context = UserCookies{
-            user_lisence: false
+        let context = LoginMsg{
+            user_lisence: false,
+            message: m
         };
         return Template::render("signin", &context)
     }
 }
 
+#[get("/about_me")]              // <- route attribute
+fn about_me(mut cookie:Cookies) -> Template {  // <- request handler
+    if let Some(cook) = cookie.get_private("account"){
+        let context = UserCookies{
+            user_lisence: true
+        };
+        return Template::render("about_me", &context)
+    }else {
+        let context = UserCookies{
+            user_lisence: false
+        };
+        return Template::render("about_me", &context)
+    }
+}
 
 
 use rocket::request::FromForm;
