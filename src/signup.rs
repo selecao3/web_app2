@@ -1,14 +1,9 @@
-use rocket::http::{ContentType, Status};
-use rocket::response::Stream;
-use rocket::response::status::Custom;
 use rocket::request::Form;
 use rocket::response::Flash;
 
 use bcrypt;
 
-use std::io::{self, Cursor, Write};
 use rocket::response::Redirect;
-use std::env;
 
 use db;
 use creater_setting;
@@ -35,11 +30,10 @@ struct SignupForm{
 }
 
 use rocket::http::{Cookies,Cookie};
-use std::collections::HashMap;
 
 #[post("/creater/profile", data = "<user>")]
 //signup.html.teraからわたされたSignup structをDBへ取り込み、なおかつaccountの値をcookieに追加して、creater_setting.html.teraへリダイレクトする
-fn signup_post(mut cookies: Cookies, user: Form<SignupForm>, connection: db::Connection) -> Flash<Redirect>{
+fn signup_post(cookies: Cookies, user: Form<SignupForm>, connection: db::Connection) -> Flash<Redirect>{
     let t = user.into_inner();
     let t_clone = t.clone();
 
@@ -47,10 +41,10 @@ fn signup_post(mut cookies: Cookies, user: Form<SignupForm>, connection: db::Con
     if insert(t_clone,&connection, cookies) {
         println!("成功");
 
-        Flash::success(Redirect::to("/creater/account/new"), "成功してる")
+        Flash::success(Redirect::to("/creater/account/new"), "")
         //creater編集画面へ
     } else {
-        Flash::error(Redirect::to("/"), "失敗した。")
+        Flash::error(Redirect::to("/"), "")
     }
 }
 
@@ -66,7 +60,7 @@ fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> boo
         password: bcrypt::hash(signupform.password.trim(), bcrypt::DEFAULT_COST).unwrap(),
         regulation: false
     };
-    let mut cookie_account = Cookie::new("account",t.clone().account);
+    let cookie_account = Cookie::new("account",t.clone().account);
     cookies.add_private(cookie_account.clone());
 
     creater_setting::insert(conn,cookies);
@@ -74,11 +68,4 @@ fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> boo
     //account or mail_addressがDB上で同じだとFalse
 
 
-}
-pub fn read_user(connection: &PgConnection) -> Vec<Signup> {
-    //postsテーブルからデータを読み取る。
-    all_creater
-        .order(creater::id.desc())
-        .load::<Signup>(connection)
-        .expect("error")
 }

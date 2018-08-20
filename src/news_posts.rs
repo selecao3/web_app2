@@ -6,21 +6,18 @@ use multipart::server::save::SaveResult::*;
 
 use rocket::Data;
 use rocket::http::{ContentType, Status};
-use rocket::response::Stream;
 use rocket::response::status::Custom;
 
-use std::io::{self, Cursor, Write};
+use std::io::{self, Write};
 use rocket::response::Redirect;
-use std::env;
 
-use regex::Regex;
 
 use comrak::{markdown_to_html, ComrakOptions};
 
 
 
 use schema::post_img;
-use schema::post_img::dsl::{post_img as all_post_img, regulation as post_img_regulation};
+use schema::post_img::dsl::post_img as all_post_img;
 
 #[derive(Serialize, Queryable, Debug,Clone,Insertable)]
 #[table_name = "post_img"]
@@ -66,7 +63,7 @@ fn multipart_upload(cont_type: &ContentType, data: Data, conn:Connection,mut coo
     let cookie = cookies.get_private("account").clone();
 
     match process_upload(boundary, data,conn,cookies) {
-        Ok(resp) => Ok(Redirect::to(format!("/creater/account/{}",cookie.unwrap().value()).as_str())),
+        Ok(_) => Ok(Redirect::to(format!("/creater/account/{}",cookie.unwrap().value()).as_str())),
         Err(err) => Err(Custom(Status::InternalServerError, err.to_string()))
     }
 }
@@ -100,19 +97,13 @@ fn process_upload(boundary: &str, data: Data, conn:Connection, cookies:Cookies) 
 // having a streaming output would be nice; there's one for returning a `Read` impl
 // but not one that you can `write()` to
 
-use multipart::server::FieldHeaders;
-use multipart::server::save::SavedField;
-use multipart::server::save::SaveDir::Perm;
 use multipart::server::save::SavedData;
-use std::path::PathBuf;
-use db;
 use db::Connection;
 use std::fs::rename;
-use std::mem::replace;
 
 
 
-fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, cookies:Cookies) -> io::Result<()>{
+fn process_entries(entries: Entries, out: &mut Vec<u8>, conn:Connection, cookies:Cookies) -> io::Result<()>{
     {
 
         /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
@@ -126,7 +117,7 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection, coo
             if let Some(file_data) = &entries.fields.get(&"file[]".to_string()){
                 if let Some(file) = file_data.get(i){
                     //fileがuploadされた時
-                    if let SavedData::File(bbb,ccc) = &file.data{
+                    if let SavedData::File(bbb,_) = &file.data{
                         println!("{:?}", bbb);
                         let mut s = bbb.to_str().unwrap().to_string();
                         s.push_str(".png");
@@ -199,7 +190,6 @@ use rocket::http::Cookies;
 use rocket::http::Cookie;
 
 use creater_setting;
-use creater_setting::profile;
 
 
 fn insert(postimgform:PostImgForm, conn: &PgConnection,mut cookies: Cookies) -> bool{

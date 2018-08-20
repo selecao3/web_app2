@@ -8,10 +8,8 @@ extern crate rocket_contrib;
 extern crate multipart;
 extern crate formdata;
 #[macro_use] extern crate diesel;
-extern crate regex;
 extern crate bcrypt;
 extern crate comrak;
-extern crate resize;
 extern crate chrono;
 extern crate chrono_tz;
 
@@ -24,11 +22,9 @@ use creater_setting::static_rocket_route_info_for_multipart_user_setting;
 use signin::static_rocket_route_info_for_signin_post;
 use signout::static_rocket_route_info_for_signout_post;
 
-use rocket::http::RawStr;
 use rocket::response::Redirect;
 use rocket_contrib::Template;
 
-use diesel::pg::PgConnection;
 
 
 mod news_posts;
@@ -40,10 +36,6 @@ mod schema;
 mod signout;
 
 
-#[derive(Serialize)]
-struct TemplateRenderTest{
-    name: String,
-}
 
 #[derive(Serialize)]
 struct UserCookies{
@@ -54,7 +46,7 @@ struct UserCookies{
 //getメソッド群
 #[get("/")]
 fn home(conn:db::Connection, mut cookie:Cookies) -> Template{
-    if let Some(cook) = cookie.get_private("account"){
+    if let Some(_) = cookie.get_private("account"){
         let mut context = Context::row_image(&conn);
         let context = Context{user_lisence:true, .. context};
 
@@ -68,7 +60,7 @@ fn home(conn:db::Connection, mut cookie:Cookies) -> Template{
 
 #[get("/signup")]              // <- route attribute
 fn signup(mut cookie: Cookies) -> Template {  // <- request handler
-    if let Some(cook) = cookie.get_private("account"){
+    if let Some(_) = cookie.get_private("account"){
         let context = UserCookies{
             user_lisence: true
         };
@@ -98,7 +90,7 @@ fn login(msg:Option<FlashMessage>,mut cookie:Cookies) -> Template {  // <- reque
     };
     println!("{}",m);
 
-    if let Some(cook) = cookie.get_private("account"){
+    if let Some(_) = cookie.get_private("account"){
         let context = LoginMsg{
             user_lisence: true,
             message: m
@@ -115,7 +107,7 @@ fn login(msg:Option<FlashMessage>,mut cookie:Cookies) -> Template {  // <- reque
 
 #[get("/about_me")]              // <- route attribute
 fn about_me(mut cookie:Cookies) -> Template {  // <- request handler
-    if let Some(cook) = cookie.get_private("account"){
+    if let Some(_) = cookie.get_private("account"){
         let context = UserCookies{
             user_lisence: true
         };
@@ -129,7 +121,6 @@ fn about_me(mut cookie:Cookies) -> Template {  // <- request handler
 }
 
 
-use rocket::request::FromForm;
 
 
 /*#[get("/creater/account")]              // <- route attribute
@@ -160,8 +151,6 @@ fn news(connection: db::Connection, cookies:Cookies) -> Template {  // <- reques
 
 use rocket::http::Cookies;
 
-use rocket::http::Cookie;
-use rocket::request::Form;
 
 
 //postメソッド群
@@ -192,7 +181,6 @@ fn profile_static(path: PathBuf) -> Option<NamedFile> {
 
 
 
-use diesel::prelude::*;
 
 
 
@@ -208,20 +196,7 @@ struct Context{
 use rocket::response::Flash;
 
 
-use std::env;
-use std::io;
-use rocket::Data;
-
-
-use std::io::Read;
-use std::fs;
-use std::fs::File;
-
-use std::io::Write;
-
 extern crate rocket_static_fs;
-
-use rocket::http::hyper::header::Headers;
 
 
 #[get("/<path..>", rank = 7)]
@@ -270,7 +245,7 @@ fn user_setting(connection: db::Connection, cookies:Cookies) -> Template {
 
 #[get("/images")]              // <- route attribute
 fn images(connection: db::Connection,mut cookie:Cookies) -> Template {  // <- request handler
-    if let Some(cook) = cookie.get_private("account"){
+    if let Some(_) = cookie.get_private("account"){
         let mut context = Context::row_image(&connection);
         let context = Context{user_lisence:true, .. context};
 
@@ -294,7 +269,7 @@ fn creater(account: User, connection: db::Connection) -> Template {  // <- reque
 }*/
 
 #[get("/creater")]              // <- route attribute
-fn creater(mut cookie:Cookies,connection: db::Connection) -> Template {  // <- request handler
+fn creater(cookie:Cookies,connection: db::Connection) -> Template {  // <- request handler
     Template::render("creaters", ProfileContext::row(cookie, &connection))
 }
 
@@ -307,7 +282,7 @@ struct ProfileContext{
 
 impl ProfileContext{
     fn row(mut cookie:Cookies,connection: &db::Connection) -> ProfileContext{
-        if let Some(cook) = cookie.get_private("account"){
+        if let Some(_) = cookie.get_private("account"){
             let profile = ProfileContext{
                 profile:creater_setting::read_profiles_all(&connection),
                 user_lisence: true

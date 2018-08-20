@@ -7,7 +7,6 @@ use rocket::{Request, State, Outcome};
 use diesel::pg::PgConnection;
 use diesel::r2d2::{ConnectionManager, Pool, PooledConnection};
 
-use diesel::QueryDsl;
 
 
 // An alias to the type for a pool of Diesel Mysql Connection

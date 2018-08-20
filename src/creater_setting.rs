@@ -7,21 +7,17 @@ use multipart::server::save::SaveResult::*;
 
 use rocket::Data;
 use rocket::http::{ContentType, Status};
-use rocket::response::Stream;
 use rocket::response::status::Custom;
 
-use std::io::{self, Cursor, Write};
+use std::io::{self, Write};
 use rocket::response::Redirect;
-use std::env;
 
 
-use diesel::sql_types::Date;
-use chrono::{NaiveDateTime, TimeZone, Local};
+use chrono::Local;
 use chrono_tz::Tz;
 
-pub const Japan: Tz = Tz::Japan;
+pub const JAPAN: Tz = Tz::Japan;
 
-use comrak::{markdown_to_html, ComrakOptions};
 
 pub use schema::profile;
 pub use schema::profile::dsl::{profile as all_profile , regulation as profile_regulation};
@@ -66,7 +62,7 @@ fn multipart_user_setting(cont_type: &ContentType, data: Data, conn:Connection,m
     let cookie = cookies.get_private("account");
 
     match process_upload(boundary, data,conn,cookies) {
-        Ok(resp) => Ok(Redirect::to(format!("/creater/account/{}",cookie.unwrap().value()).as_str())),
+        Ok(_) => Ok(Redirect::to(format!("/creater/account/{}",cookie.unwrap().value()).as_str())),
         Err(err) => Err(Custom(Status::InternalServerError, err.to_string()))
     }
 }
@@ -100,18 +96,12 @@ fn process_upload(boundary: &str, data: Data, conn:Connection,cookies:Cookies) -
 // having a streaming output would be nice; there's one for returning a `Read` impl
 // but not one that you can `write()` to
 
-use multipart::server::FieldHeaders;
-use multipart::server::save::SavedField;
-use multipart::server::save::SaveDir::Perm;
 use multipart::server::save::SavedData;
-use std::path::PathBuf;
-use db;
 use db::Connection;
 use std::fs::rename;
-use std::mem::replace;
 
 
-fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection,mut cookies:Cookies) -> io::Result<()> {
+fn process_entries(entries: Entries, out: &mut Vec<u8>, conn:Connection,cookies:Cookies) -> io::Result<()> {
     {
 
         /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
@@ -123,7 +113,7 @@ fn process_entries(entries: Entries, mut out: &mut Vec<u8>, conn:Connection,mut 
 
 
 
-        if let SavedData::File(bbb,ccc) = profile_img{
+        if let SavedData::File(bbb,_) = profile_img{
             println!("{:?}", bbb);
             let mut s = bbb.to_str().unwrap().to_string();
             s.push_str(".png");
@@ -221,7 +211,7 @@ pub fn insert(conn: &PgConnection,mut cookies: Cookies) -> bool{
         profile_img: "".to_string(),
         //保存したimg_urlをどうにかしてPost structへ・・・
         regulation: false,
-        created_day: Local::now().with_timezone(&Japan).to_rfc3339()
+        created_day: Local::now().with_timezone(&JAPAN).to_rfc3339()
     };
     diesel::insert_into(profile::table).values(&t).execute(conn).is_ok()
 }
@@ -237,7 +227,7 @@ fn update(profile:ProfileForm, conn: &PgConnection,mut cookies: Cookies) -> bool
         profile_img: profile.profile_img,
         //保存したimg_urlをどうにかしてPost structへ・・・
         regulation: false,
-        created_day: Local::now().with_timezone(&Japan).to_rfc3339()
+        created_day: Local::now().with_timezone(&JAPAN).to_rfc3339()
 
     };
     diesel::update(all_profile
