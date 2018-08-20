@@ -12,7 +12,7 @@ use std::io::{self, Write};
 use rocket::response::Redirect;
 
 
-use comrak::{markdown_to_html, ComrakOptions};
+/*use comrak::{markdown_to_html, ComrakOptions};*/
 
 
 
@@ -157,9 +157,9 @@ fn process_entries(entries: Entries, out: &mut Vec<u8>, conn:Connection, cookies
         if let SavedData::Text(body_string) = body_data{
             println!("{}",body_string);
 
-            let html = markdown_to_html(body_string, &ComrakOptions::default());
-            println!("{}",html);
-            tmp.push(html);
+/*            let html = markdown_to_html(body_string, &ComrakOptions::default());
+            println!("{}",html);*/
+            tmp.push(body_string.to_string());
         }
         let t = PostImgForm{
             title:tmp[4].clone(),

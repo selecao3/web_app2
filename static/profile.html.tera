@@ -14,7 +14,7 @@
         }
     </style>
     {% for i in profile%}
-        <div class="card mb-3" style="width: 300px; display: inline-block">
+        <div class="card mb-3" style="width: 300px; display: inline-block;box-shadow: 0px 0px 10px;">
             <h3 class="card-header">{{ i.name }}
                 {% if user_lisence == true %}
                     <a href="/creater/account/new">
@@ -36,7 +36,7 @@
         <div class="card-body" id="change_to_form">
             <p class="card-text" id="Text01">
                 <span style="font-style: italic" id="Text02">
-                    <pre id="post_body">{{ i.profile_text|safe }}</pre>
+                    <pre id="post_body" style="white-space: pre-wrap">{{ i.profile_text|safe }}</pre>
                 </span>
             </p>
         </div>
@@ -68,9 +68,9 @@
                         {% endif %}
 
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" >
+                            <pre id="post_content" style="white-space: pre-wrap;font-size: 18px;">{{ i.body|safe }}</pre>
 
-                        <p>{{ i.body|safe }}</p>
                         <table style="margin: 0 auto">
                             <tr>
                                 {% if i.img_url_1 != "" %}
@@ -115,16 +115,7 @@
 
         {% for i in post_img %}
             <div class="jumbotron" style="width: 800px;">
-                <h2>{{ i.title }}</h2>
-
-                <hr>
-                {#                <p class="lead" id="post_body">{{ i.body| safe |truncate(length=30, end="\n")}}</p>#}
-                <p class="lead">{{ i.body| safe| truncate(length=20)}}</p>
-                {#                <a href="{{ i.img_url_1 }}" target="_blank">
-                    <img style="height: 200px" src="{{ i.img_url_1 }}" alt="">
-                </a>#}
-                <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#modal{{ i.id }}" >もっと詳しく</button>
-
+                <a href="#" data-toggle="modal" data-target="#modal{{ i.id }}"><h2>{{ i.title }}</h2></a>
             </div>
 
         {% endfor %}
@@ -134,7 +125,9 @@
     <script>
         var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
         var $post_body = $('#post_body');
+        var $post_content = $('#post_content');
         $post_body.html(($post_body).html().replace(exp, "<a href='$1' target='_blank'>$1</a>"));
+        $post_content.html(($post_content).html().replace(exp, "<a href='$1' target='_blank'>$1</a>"));
     </script>
 
 
