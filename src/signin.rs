@@ -54,9 +54,8 @@ fn check(conn: &PgConnection, signin:SigninForm) -> bool {
         Err(_) => "".to_string()
     };
     if pass == "" {
-       //入寮されたaccountの値が存在しないものだった場合
+       //入力されたaccountの値が存在しないものだった場合
         return false
     }
     bcrypt::verify(signin.password_flag.as_str(), pass.as_str()).unwrap()
-        //parwwordの部分がおかしい？
 }

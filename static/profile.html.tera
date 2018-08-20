@@ -115,11 +115,11 @@
 
         {% for i in post_img %}
             <div class="jumbotron" style="width: 800px;">
-                <h3>{{ i.title }}</h3>
+                <h2>{{ i.title }}</h2>
 
                 <hr>
                 {#                <p class="lead" id="post_body">{{ i.body| safe |truncate(length=30, end="\n")}}</p>#}
-                <p class="lead">{{ i.body| safe}}</p>
+                <p class="lead">{{ i.body| safe| truncate(length=20)}}</p>
                 {#                <a href="{{ i.img_url_1 }}" target="_blank">
                     <img style="height: 200px" src="{{ i.img_url_1 }}" alt="">
                 </a>#}
