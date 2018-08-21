@@ -11,22 +11,22 @@
                 <div style="margin-right: 5px;margin-left: 5px;margin-top: 10px;">
                     {% if img.img_url_1 != "" %}
                         <a href="/creater/account/{{ img.account }}">
-                            <img src="{{ img.img_url_1 }}" height="240px" alt="Card image" />
+                            <img src="{{ img.img_url_1 }}" height="200px" alt="Card image" />
                         </a>
                     {% endif %}
                     {% if img.img_url_2 != "" %}
                         <a href="/creater/account/{{ img.account }}">
-                            <img src="{{ img.img_url_2 }}" height="240px" alt="Card image" />
+                            <img src="{{ img.img_url_2 }}" height="200px" alt="Card image" />
                         </a>
                     {% endif %}
                     {% if img.img_url_3 != "" %}
                         <a href="/creater/account/{{ img.account }}">
-                            <img src="{{ img.img_url_3 }}" height="240px" alt="Card image" />
+                            <img src="{{ img.img_url_3 }}" height="200px" alt="Card image" />
                         </a>
                     {% endif %}
                     {% if img.img_url_4 != "" %}
                         <a href="/creater/account/{{ img.account }}">
-                            <img src="{{ img.img_url_4 }}" height="240px" alt="Card image" />
+                            <img src="{{ img.img_url_4 }}" height="200px" alt="Card image" />
                         </a>
                     {% endif %}
                 </div>
