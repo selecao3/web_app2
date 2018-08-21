@@ -20,6 +20,7 @@ table! {
         img_url_3 -> Text,
         img_url_4 -> Text,
         regulation -> Bool,
+        created_day -> Varchar,
     }
 }
 

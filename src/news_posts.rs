@@ -11,6 +11,10 @@ use rocket::response::status::Custom;
 use std::io::{self, Write};
 use rocket::response::Redirect;
 
+use chrono::Local;
+use chrono_tz::Tz;
+
+pub const JAPAN: Tz = Tz::Japan;
 
 /*use comrak::{markdown_to_html, ComrakOptions};*/
 
@@ -31,7 +35,8 @@ pub struct PostImg {
     img_url_2: String,
     img_url_3: String,
     img_url_4: String,
-    regulation: bool
+    regulation: bool,
+    created_day:String
 }
 
 #[derive(FromForm)]
@@ -211,7 +216,8 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection,mut cookies: Cookies) -> 
         img_url_3: postimgform.img_url_3,
         img_url_4: postimgform.img_url_4,
         //保存したimg_urlをどうにかしてPost structへ・・・
-        regulation: false
+        regulation: false,
+        created_day: Local::now().with_timezone(&JAPAN).to_rfc3339()
     };
     diesel::insert_into(post_img::table).values(&t).execute(conn).is_ok()
 }

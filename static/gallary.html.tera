@@ -9,23 +9,30 @@
         <div style="justify-content: space-between;display: inline-flex;flex-wrap: wrap;">
             {% for img in post_img %}
                 <div style="margin-right: 5px;margin-left: 5px;margin-top: 10px;">
-                    <a href="/creater/account/{{ img.account }}">
-                        <img src="{{ img.img_url_1 }}" height="240px" alt="Card image" />
-                    </a>
-                    <a href="/creater/account/{{ img.account }}">
-                        <img src="{{ img.img_url_2 }}" height="240px" alt="Card image" />
-                    </a>
-                    <a href="/creater/account/{{ img.account }}">
-                        <img src="{{ img.img_url_3 }}" height="240px" alt="Card image" />
-                    </a>
-                    <a href="/creater/account/{{ img.account }}">
-                        <img src="{{ img.img_url_4 }}" height="240px" alt="Card image" />
-                    </a>
-
+                    {% if img.img_url_1 != "" %}
+                        <a href="/creater/account/{{ img.account }}">
+                            <img src="{{ img.img_url_1 }}" height="240px" alt="Card image" />
+                        </a>
+                    {% endif %}
+                    {% if img.img_url_2 != "" %}
+                        <a href="/creater/account/{{ img.account }}">
+                            <img src="{{ img.img_url_2 }}" height="240px" alt="Card image" />
+                        </a>
+                    {% endif %}
+                    {% if img.img_url_3 != "" %}
+                        <a href="/creater/account/{{ img.account }}">
+                            <img src="{{ img.img_url_3 }}" height="240px" alt="Card image" />
+                        </a>
+                    {% endif %}
+                    {% if img.img_url_4 != "" %}
+                        <a href="/creater/account/{{ img.account }}">
+                            <img src="{{ img.img_url_4 }}" height="240px" alt="Card image" />
+                        </a>
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
-    </div>
+        </div>
 
 
 {% endblock content %}

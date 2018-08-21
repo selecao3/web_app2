@@ -9,7 +9,8 @@ CREATE TABLE post_img (
   img_url_2 TEXT,
   img_url_3 TEXT,
   img_url_4 TEXT,
-  regulation BOOLEAN NOT NULL DEFAULT 'f'
+  regulation BOOLEAN NOT NULL DEFAULT 'f',
+  created_day VARCHAR
 );
 -- userは予約語なので不可
 CREATE TABLE profile (
