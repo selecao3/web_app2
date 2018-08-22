@@ -12,6 +12,7 @@ extern crate bcrypt;
 extern crate comrak;
 extern crate chrono;
 extern crate chrono_tz;
+extern crate regex;
 
 
 
@@ -59,15 +60,23 @@ fn home(conn:db::Connection, mut cookie:Cookies) -> Template{
 
 
 #[get("/signup")]              // <- route attribute
-fn signup(mut cookie: Cookies) -> Template {  // <- request handler
+fn signup(msg:Option<FlashMessage>,mut cookie:Cookies) -> Template {  // <- request handler
+    let m = match msg {
+        Some(m) => m.msg().to_string(),
+        None => "".to_string()
+    };
+    println!("{}",m);
+
     if let Some(_) = cookie.get_private("account"){
-        let context = UserCookies{
-            user_lisence: true
+        let context = LoginMsg{
+            user_lisence: true,
+            message: m
         };
         return Template::render("sign_up", &context)
     }else {
-        let context = UserCookies{
-            user_lisence: false
+        let context = LoginMsg{
+            user_lisence: false,
+            message: m
         };
         return Template::render("sign_up", &context)
     }

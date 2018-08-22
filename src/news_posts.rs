@@ -35,7 +35,7 @@ pub struct PostImg {
     img_url_2: String,
     img_url_3: String,
     img_url_4: String,
-    regulation: bool,
+    regulation: String,
     created_day:String
 }
 
@@ -47,6 +47,7 @@ struct PostImgForm{
     img_url_2: String,
     img_url_3: String,
     img_url_4: String,
+    regulation: String,
     /*    regulation: bool,*/
 }
 
@@ -111,10 +112,11 @@ use std::fs::rename;
 fn process_entries(entries: Entries, out: &mut Vec<u8>, conn:Connection, cookies:Cookies) -> io::Result<()>{
     {
 
-        /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
+                println!("======¥n{:?}¥n========",entries.fields);
 /*        let file_data = &entries.fields.get(&"file".to_string()).unwrap().get(0).unwrap().data;*/
         let title_data = &entries.fields.get(&"title".to_string()).unwrap().get(0).unwrap().data;
         let body_data = &entries.fields.get(&"body".to_string()).unwrap().get(0).unwrap().data;
+        let regulation = &entries.fields.get(&"customRadio".to_string()).unwrap().get(0).unwrap().data;
 
         let mut tmp:Vec<String> = Vec::new();
 
@@ -142,33 +144,19 @@ fn process_entries(entries: Entries, out: &mut Vec<u8>, conn:Connection, cookies
             }
         }
 
-
-        /*        if let SavedData::File(bbb,ccc) = file_data{
-                    println!("{:?}", bbb);
-                    let mut s = bbb.to_str().unwrap().to_string();
-                    s.push_str(".png");
-                    rename(bbb.to_str().unwrap(),s.trim() ).unwrap();
-                    println!("{}",s.trim_left_matches("static/").to_string());
-                    //file名を*.pngに変更している.
-                    let file_path = s.trim_left_matches("static/").to_string();
-
-                    tmp.push(file_path);
-
-                }*/
         if let SavedData::Text(title_string) = title_data{
-            println!("{}",title_string);
             tmp.push(title_string.to_string());
         }
         if let SavedData::Text(body_string) = body_data{
-            println!("{}",body_string);
-
-/*            let html = markdown_to_html(body_string, &ComrakOptions::default());
-            println!("{}",html);*/
             tmp.push(body_string.to_string());
+        }
+        if let SavedData::Text(regulation_flag) = regulation{
+            tmp.push(regulation_flag.to_string());
         }
         let t = PostImgForm{
             title:tmp[4].clone(),
             body:tmp[5].clone(),
+            regulation:tmp[6].clone(),
             img_url_1:tmp[0].clone(),
             img_url_2:tmp[1].clone(),
             img_url_3:tmp[2].clone(),
@@ -216,7 +204,7 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection,mut cookies: Cookies) -> 
         img_url_3: postimgform.img_url_3,
         img_url_4: postimgform.img_url_4,
         //保存したimg_urlをどうにかしてPost structへ・・・
-        regulation: false,
+        regulation: postimgform.regulation,
         created_day: Local::now().with_timezone(&JAPAN).to_rfc3339()
     };
     diesel::insert_into(post_img::table).values(&t).execute(conn).is_ok()

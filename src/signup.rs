@@ -8,6 +8,8 @@ use rocket::response::Redirect;
 use db;
 use creater_setting;
 
+use regex::Regex;
+
 
 pub use schema::creater;
 pub use schema::creater::dsl::{creater as all_creater};
@@ -36,27 +38,35 @@ use rocket::http::{Cookies,Cookie};
 fn signup_post(cookies: Cookies, user: Form<SignupForm>, connection: db::Connection) -> Flash<Redirect>{
     let t = user.into_inner();
     let t_clone = t.clone();
-
-    println!("post");
-    if insert(t_clone,&connection, cookies) {
-        println!("成功");
-
-        Flash::success(Redirect::to("/creater/account/new"), "")
-        //creater編集画面へ
-    } else {
-        Flash::error(Redirect::to("/signup"), "そのアカウントは存在しています。")
+    if check_account(&t_clone) != true {
+        println!("check_account");
+        Flash::error(Redirect::to("/signup"), "アカウントは半角英数字で入力してください。")
+    }else {
+        if check_double(&connection, &t_clone) == 0 {
+            insert(t_clone,&connection, cookies);
+            Flash::success(Redirect::to("/creater/account/new"), "")
+            //creater編集画面へ
+        } else {
+            Flash::error(Redirect::to("/signup"), "そのアカウントは存在しています。")
+        }
     }
+
 }
 
 
 use diesel::pg::PgConnection;
 use diesel;
 use diesel::prelude::*;
-use diesel::dsl::exists;
 
 use schema::creater::columns::mail_address as mail;
 
-fn check(conn: &PgConnection, signup:&SignupForm) -> usize{
+fn check_account(signup:&SignupForm) -> bool{
+    //アカウントが半角英数字かどうか
+    let re = Regex::new("^[a-zA-Z0-9]+$").unwrap();
+    re.is_match(signup.account.as_str())
+}
+
+fn check_double(conn: &PgConnection, signup:&SignupForm) -> usize{
     //acountがユニークなものならtrue
     let account:usize = match self::all_creater
         .filter(creater::account.eq(signup.account.as_str())
@@ -69,13 +79,7 @@ fn check(conn: &PgConnection, signup:&SignupForm) -> usize{
     account
 }
 
-
 fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> bool{
-    let c = check(conn, &signupform);
-    println!("{}", c);
-    if check(conn, &signupform) != 0 {
-        false
-    }else {
         let t = Signup{
             id: None,
             account: signupform.account,
@@ -89,5 +93,4 @@ fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> boo
         creater_setting::insert(conn,cookies);
         diesel::insert_into(creater::table).values(&t).execute(conn).is_ok()
         //account or mail_addressがDB上で同じだとFalse
-    }
 }

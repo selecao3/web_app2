@@ -18,6 +18,9 @@
                 <label for="password">パスワード</label>
                 <input type="password" name="password" class="form-control" id="InputPassword" placeholder="Password">
             </div>
+            {% if message %}
+                <div class="invalid-feedback">{{ message }}</div>
+            {% endif %}
             <input type="submit">
             {#    <button type="button" class="btn btn-primary">Signup!!</button>#}
         </form>
@@ -26,4 +29,5 @@
     <a href="/login">
         <button type="button" class="btn btn-primary">登録済みの方はこちらへ</button>
     </a>
+
 {% endblock content %}

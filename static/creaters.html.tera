@@ -39,6 +39,28 @@
     </div>
     <!--block-->
 
+    <fieldset>
+        <div class="form-group">
+            <div class="custom-control custom-radio">
+                <input type="button" id="adult_button" name="adult_button" value="1" class="custom-control-input">
+                <label class="custom-control-label" for="adult_button">成年向けコンテンツを表示する</label>
+            </div>
+        </div>
+    </fieldset>
+
+    <script type="text/javascript">
+        $(function(){
+            $('#adult_button').on(function() {
+                $.cookie('adult', '0', { expires: 30 });
+                Cookies.set('name', 'value', { expires: 7 });
+                alert("クリック");
+            });
+        });
+    </script>
+
+
+
+
 
     <div class="bs-component">
         <div class="table-active" style="width: 100%">

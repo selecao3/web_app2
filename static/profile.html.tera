@@ -23,28 +23,29 @@
                 {% endif %}
 
             </h3>
-        <div class="card-body">
+            <div class="card-body">
 
-            <h5 class="card-title">{{ i.account}}</h5>
+                <h5 class="card-title">{{ i.account}}</h5>
 
-            <h6 class="card-subtitle text-muted"></h6>
-        </div>
-        <img class="cover" src="{{ i.profile_img }}"
-             alt="Card image">
+                <h6 class="card-subtitle text-muted"></h6>
+            </div>
+            <img class="cover" src="{{ i.profile_img }}"
+                 alt="Card image">
 
 
-        <div class="card-body" id="change_to_form">
-            <p class="card-text" id="Text01">
+            <div class="card-body" id="change_to_form">
+                <p class="card-text" id="Text01">
                 <span style="font-style: italic" id="Text02">
-                    <pre id="post_body" style="white-space: pre-wrap">{{ i.profile_text|safe }}</pre>
+                <pre id="post_body" class="mb-0" style="white-space: pre-wrap">{{ i.profile_text|safe }}</pre>
+
                 </span>
-            </p>
+                </p>
+            </div>
+            <div class="card-footer text-muted">
+                最終更新日時
+                <br>{{ i.created_day|date(format="%Y年%m月%d日 %H時%M分") }}
+            </div>
         </div>
-<div class="card-footer text-muted">
-    最終更新日時
-    <br>{{ i.created_day|date(format="%Y年%m月%d日 %H時%M分") }}
-</div>
-</div>
     {% endfor %}
 
 
@@ -55,73 +56,74 @@
 
 
         {% for i in post_img %}
-        <div class="modal" id="modal{{ i.id }}">
-            <div class="modal-dialog" role="document" style="margin: 0 auto;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 class="modal-title">{{ i.title }}</h2>
-                        {% if user_lisence == true %}
-                            <form action="/creater/account/delete/{{ i.id }}" method="post">
-                                <input type="hidden" name="_method" value="delete" placeholder="delete!!" class="btn-danger btn">
-                                <input type="submit" class="btn btn-danger" value="消去する">
-                            </form>
-                        {% endif %}
+            <div class="modal" id="modal{{ i.id }}">
+                <div class="modal-dialog" role="document" style="margin: 0 auto;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2 class="modal-title">{{ i.title }}</h2>
+                            {% if user_lisence == true %}
+                                <form action="/creater/account/delete/{{ i.id }}" method="post">
+                                    <input type="hidden" name="_method" value="delete" placeholder="delete!!" class="btn-danger btn">
+                                    <input type="submit" class="btn btn-danger" value="消去する">
+                                </form>
+                            {% endif %}
 
-                    </div>
-                    <div class="modal-body" >
+                        </div>
+                        <div class="modal-body" >
                             <pre id="post_content" style="white-space: pre-wrap;font-size: 18px;">{{ i.body|safe }}</pre>
 
-                        <table style="margin: 0 auto">
-                            <tr>
-                                {% if i.img_url_1 != "" %}
-                                    <td>
-                                        <img src="{{ i.img_url_1 }}" class="cover" style="margin-right: 70px;margin-bottom: 20px;" width="300px" alt="画像がありません">
-                                    </td>
-                                {% endif %}
-                                {% if i.img_url_2 != "" %}
-                                    <td>
-                                        <img src="{{ i.img_url_2 }}" class="cover" width="300px" style="margin-bottom: 20px;" alt="画像がありません">
-                                    </td>
-                                {% endif %}
-                            </tr>
-                            <tr>
-                                {% if i.img_url_3 != "" %}
-                                    <td>
-                                        <img src="{{ i.img_url_3 }}" class="cover" style="margin-right: 70px" width="300px" alt="画像がありません">
-                                    </td>
-                                {% endif %}
-                                {% if i.img_url_4 != "" %}
-                                    <td>
-                                        <img src="{{ i.img_url_4 }}" class="cover" width="300px" alt="画像がありません">
-                                    </td>
-                                {% endif %}
-                            </tr>
-                        </table>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
+                                <table style="margin: 0 auto">
+                                    <tr>
+                                        {% if i.img_url_1 != "" %}
+                                            <td>
+                                                <img src="{{ i.img_url_1 }}" class="cover" style="margin-right: 70px;margin-bottom: 20px;" width="300px" alt="画像がありません">
+                                            </td>
+                                        {% endif %}
+                                        {% if i.img_url_2 != "" %}
+                                            <td>
+                                                <img src="{{ i.img_url_2 }}" class="cover" width="300px" style="margin-bottom: 20px;" alt="画像がありません">
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                    <tr>
+                                        {% if i.img_url_3 != "" %}
+                                            <td>
+                                                <img src="{{ i.img_url_3 }}" class="cover" style="margin-right: 70px" width="300px" alt="画像がありません">
+                                            </td>
+                                        {% endif %}
+                                        {% if i.img_url_4 != "" %}
+                                            <td>
+                                                <img src="{{ i.img_url_4 }}" class="cover" width="300px" alt="画像がありません">
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                </table>
 
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+
+                    </div>
                 </div>
             </div>
-        </div>
         {% endfor %}
 
-        {#        <script>
+    {#        <script>
             $('.click_btn').on('click', function () {
                 $('.modal').modal('show');
             });
         </script>#}
-        <section class="bs-docs-section">
-            <div class="row" style="width: 800px;">
-                <div class="col-lg-12">
-                    <div class="page-header">
-                        <h1 id="tables">最近の投稿</h1>
-                    </div>
-                    <div class="bs-component">
-                        <table class="table table-hover">
-                            {% for i in post_img %}
 
+    <section class="bs-docs-section">
+        <div class="row" style="width: 800px;">
+            <div class="col-lg-12">
+                <div class="page-header">
+                    <h1 id="tables">最近の投稿</h1>
+                </div>
+                <div class="bs-component">
+                    <table class="table table-hover">
+                        {% for i in post_img %}
                                 {% if loop.index0 is divisibleby(2) %}
                                     <tr>
                                         <th scope="col"><a href="#" data-toggle="modal" data-target="#modal{{ i.id }}"><h3>{{ i.title }}</h3></a></th>
@@ -133,14 +135,13 @@
                                         <td>{{ i.created_day|date(format="%Y年%m月%d日 %H時%M分") }}</td>
                                     </tr>
                                 {% endif %}
+                        {% endfor %}
 
-                            {% endfor %}
-                        </table>
-                    </div><!-- /example -->
-                </div>
+                    </table>
+                </div><!-- /example -->
             </div>
-        </section>
-    </div>
+        </div>
+    </section>
 
 
 
