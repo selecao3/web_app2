@@ -4,7 +4,6 @@ table! {
         account -> Varchar,
         mail_address -> Varchar,
         password -> Varchar,
-        regulation -> Bool,
     }
 }
 
@@ -19,7 +18,7 @@ table! {
         img_url_2 -> Text,
         img_url_3 -> Text,
         img_url_4 -> Text,
-        regulation -> Varchar,
+        adult_check -> Varchar,
         created_day -> Varchar,
     }
 }
@@ -31,7 +30,6 @@ table! {
         account -> Varchar,
         profile_text -> Text,
         profile_img -> Text,
-        regulation -> Bool,
         created_day -> Varchar,
     }
 }

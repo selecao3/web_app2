@@ -25,9 +25,14 @@
             <h1 style="margin-bottom: 20px">Latest news</h1>
         </div>
         <div class="bs-component">
+        {% set count = 0 %}
             {% for i in post_img %}
             {{i.name}}さんがタイトル「<a href="/creater/account/{{ i.account }}"><b>{{i.title}}</b></a>」を投稿しました！
             <hr>
+                {% set count = count + 1 %}
+                {% if count == 5 %}
+                    <a href="#">以前のニュースはこちら</a>
+                {% endif %}
             {% endfor %}
         </div>
     </div>

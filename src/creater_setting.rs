@@ -20,7 +20,7 @@ pub const JAPAN: Tz = Tz::Japan;
 
 
 pub use schema::profile;
-pub use schema::profile::dsl::{profile as all_profile , regulation as profile_regulation};
+pub use schema::profile::dsl::profile as all_profile;
 
 #[derive(Serialize, Queryable, Debug,Clone,Insertable)]
 #[table_name = "profile"]
@@ -30,7 +30,6 @@ pub struct Profile{
     account: String,
     profile_text: String,
     profile_img : String,
-    regulation: bool,
     created_day:String
 
 }
@@ -132,64 +131,12 @@ fn process_entries(entries: Entries, out: &mut Vec<u8>, conn:Connection,cookies:
             println!("{}",profile_string);
             tmp.push(profile_string.to_string());
         }
-/*        for i in 1..5 {
-            println!("======");
-*//*            let content = match &entries.fields.get(&format!("content0{}",i)){
-                Some(con) => match &con.get(0){
-                    Some(con) => &con.data |c| SavedData::Text(cont) = c{
-                    },
-                    None => {{continue}}
-                }
-                None =>{{continue}}
-            };*//*
-            //breakのせいでif文にはいっていない
-            //continueだとif文に入る前にfor文を繰り返す。
-
-            if let Some(con_1) = &entries.fields.get(&format!("content0{}",i)){
-                let con_option = con_1.get(0);
-                if let Some(con_2) = con_option{
-                    let con_val = &con_2.data;
-                    if let SavedData::Text(cont) = &con_val{
-                        println!("==={}====", cont);
-                        tmp.push(cont.to_string());
-                        //値が入ったもののみ
-                    }else {
-                        println!("===空欄====", );
-                        tmp.push("".to_string());
-                    }
-                }else {
-                    tmp.push("".to_string());
-                }
-            }else {
-                tmp.push("".to_string());
-            }
-            //この時点で空欄のものと何かしらの値が入ったものにわけられている。
-            //空欄ならば「空文字を代入する」という考え方
-        }*/
-
-
         let t = ProfileForm{
             profile_img:tmp[0].clone(),
             name:tmp[1].clone(),
             profile_text:tmp[2].clone(),
         };
-
-
-        //データがダブっていたら死ぬ（バグ）
-/*        if read_profile(&conn, cookies.get_private("account")).is_empty(){
-            insert(t,&conn, cookies);
-        }else {
-            update(t, &conn,cookies);
-        }*/
         update(t, &conn,cookies);
-
-
-        /*        let hoge = entries.save_dir;
-                let hage = Perm(hoge.into_path());*/
-
-
-        /*        println!("{:?}", aaa.get(0).unwrap().data::File);*/
-
     }
 
     writeln!(out)
@@ -210,7 +157,6 @@ pub fn insert(conn: &PgConnection,mut cookies: Cookies) -> bool{
         profile_text: "".to_string(),
         profile_img: "".to_string(),
         //保存したimg_urlをどうにかしてPost structへ・・・
-        regulation: false,
         created_day: Local::now().with_timezone(&JAPAN).to_rfc3339()
     };
     diesel::insert_into(profile::table).values(&t).execute(conn).is_ok()
@@ -226,7 +172,6 @@ fn update(profile:ProfileForm, conn: &PgConnection,mut cookies: Cookies) -> bool
         profile_text: profile.profile_text,
         profile_img: profile.profile_img,
         //保存したimg_urlをどうにかしてPost structへ・・・
-        regulation: false,
         created_day: Local::now().with_timezone(&JAPAN).to_rfc3339()
 
     };

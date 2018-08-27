@@ -21,7 +21,6 @@ pub struct Signup{
     account: String,
     mail_address: String,
     password: String,
-    regulation: bool
 }
 
 #[derive(FromForm, Clone)]
@@ -85,7 +84,6 @@ fn insert(signupform:SignupForm, conn: &PgConnection,mut cookies:Cookies) -> boo
             account: signupform.account,
             mail_address: signupform.mail_address,
             password: bcrypt::hash(signupform.password.trim(), bcrypt::DEFAULT_COST).unwrap(),
-            regulation: false
         };
         let cookie_account = Cookie::new("account",t.clone().account);
         cookies.add_private(cookie_account.clone());

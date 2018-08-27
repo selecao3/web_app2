@@ -35,7 +35,7 @@ pub struct PostImg {
     img_url_2: String,
     img_url_3: String,
     img_url_4: String,
-    regulation: String,
+    adult_check: String,
     created_day:String
 }
 
@@ -47,7 +47,7 @@ struct PostImgForm{
     img_url_2: String,
     img_url_3: String,
     img_url_4: String,
-    regulation: String,
+    adult_check: String,
     /*    regulation: bool,*/
 }
 
@@ -116,7 +116,7 @@ fn process_entries(entries: Entries, out: &mut Vec<u8>, conn:Connection, cookies
 /*        let file_data = &entries.fields.get(&"file".to_string()).unwrap().get(0).unwrap().data;*/
         let title_data = &entries.fields.get(&"title".to_string()).unwrap().get(0).unwrap().data;
         let body_data = &entries.fields.get(&"body".to_string()).unwrap().get(0).unwrap().data;
-        let regulation = &entries.fields.get(&"customRadio".to_string()).unwrap().get(0).unwrap().data;
+        let adult_check = &entries.fields.get(&"customRadio".to_string()).unwrap().get(0).unwrap().data;
 
         let mut tmp:Vec<String> = Vec::new();
 
@@ -150,13 +150,13 @@ fn process_entries(entries: Entries, out: &mut Vec<u8>, conn:Connection, cookies
         if let SavedData::Text(body_string) = body_data{
             tmp.push(body_string.to_string());
         }
-        if let SavedData::Text(regulation_flag) = regulation{
-            tmp.push(regulation_flag.to_string());
+        if let SavedData::Text(adult_check_flag) = adult_check{
+            tmp.push(adult_check_flag.to_string());
         }
         let t = PostImgForm{
             title:tmp[4].clone(),
             body:tmp[5].clone(),
-            regulation:tmp[6].clone(),
+            adult_check:tmp[6].clone(),
             img_url_1:tmp[0].clone(),
             img_url_2:tmp[1].clone(),
             img_url_3:tmp[2].clone(),
@@ -204,7 +204,7 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection,mut cookies: Cookies) -> 
         img_url_3: postimgform.img_url_3,
         img_url_4: postimgform.img_url_4,
         //保存したimg_urlをどうにかしてPost structへ・・・
-        regulation: postimgform.regulation,
+        adult_check: postimgform.adult_check,
         created_day: Local::now().with_timezone(&JAPAN).to_rfc3339()
     };
     diesel::insert_into(post_img::table).values(&t).execute(conn).is_ok()
@@ -212,30 +212,61 @@ fn insert(postimgform:PostImgForm, conn: &PgConnection,mut cookies: Cookies) -> 
 use schema::profile::columns::name;
 
 
-pub fn read_post_img(connection: &PgConnection, cookies:Option<Cookie>) -> Vec<PostImg> {
+pub fn read_post_img(connection: &PgConnection, cookies:Option<Cookie>,adult_check:String) -> Vec<PostImg> {
     //postsテーブルからデータを読み取る。
-    all_post_img
+    if adult_check == "0".to_string() {
+        all_post_img
+            .filter(post_img::account.eq(cookies.unwrap().value())
+                .and(post_img::adult_check.eq("0")))
+            //accountが◯◯のものを取り出す
+            .order(post_img::id.desc())
+            .load::<PostImg>(connection)
+            .expect("error")
+    }else {
+            all_post_img
         .filter(post_img::account.eq(cookies.unwrap().value()))
         //accountが◯◯のものを取り出す
         .order(post_img::id.desc())
         .load::<PostImg>(connection)
         .expect("error")
+    }
+
 }
-pub fn read_post_img_normal(connection: &PgConnection, account:String) -> Vec<PostImg> {
+pub fn read_post_img_normal(connection: &PgConnection, account:String, adult_check:String) -> Vec<PostImg> {
     //postsテーブルからデータを読み取る。
-    all_post_img
-        .filter(post_img::account.eq(account.as_str()))
-        //accountが◯◯のものを取り出す
-        .order(post_img::id.desc())
-        .load::<PostImg>(connection)
-        .expect("error")
+
+    if adult_check == "0".to_string() {
+        all_post_img
+            .filter(post_img::account.eq(account.as_str()).and(post_img::adult_check.eq("0")))
+            //accountが◯◯のものを取り出す
+            .order(post_img::id.desc())
+            .load::<PostImg>(connection)
+            .expect("error")
+    }else {
+        all_post_img
+            .filter(post_img::account.eq(account.as_str()))
+            //accountが◯◯のものを取り出す
+            .order(post_img::id.desc())
+            .load::<PostImg>(connection)
+            .expect("error")
+    }
 }
-pub fn read_gallary(connection: &PgConnection) -> Vec<PostImg> {
+pub fn read_gallary(connection: &PgConnection,adult_check:String) -> Vec<PostImg> {
     //postsテーブルからデータを読み取る。
-    all_post_img
-        .order(post_img::id.desc())
-        .load::<PostImg>(connection)
-        .expect("error")
+    if adult_check == "0".to_string() {
+        all_post_img
+            .order(post_img::id.desc())
+            .filter(post_img::adult_check.eq("0"))
+            .load::<PostImg>(connection)
+            .expect("error")
+    }else {
+        //adultの時
+        all_post_img
+            .order(post_img::id.desc())
+            .load::<PostImg>(connection)
+            .expect("error")
+    }
+
 }
 pub fn posts_delete(id:i32,connection: &PgConnection) -> bool {
     //postsテーブルからデータを読み取る。

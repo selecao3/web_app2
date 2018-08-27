@@ -34,26 +34,37 @@
     <!--ブロック一個分作る。-->
     <div id="tmp" class="col-lg-12">
         <div class="page-header">
-            <h1 style="margin-bottom: 20px">Creaters</h1>
+            <h1 style="margin-bottom: 20px;display: inline-block;">Creaters</h1>
+            <fieldset style="display: inline-block">
+                <div class="form-group">
+                    <div class="custom-control custom-radio">
+                        <input type="button" id="adult_button" name="adult_button" value="1" class="custom-control-input">
+                        <label class="btn-warning btn btn-sm" for="adult_button">
+                            <span id="adult_or">
+                            成年向けコンテンツも表示する
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </fieldset>
         </div>
+
     </div>
     <!--block-->
 
-    <fieldset>
-        <div class="form-group">
-            <div class="custom-control custom-radio">
-                <input type="button" id="adult_button" name="adult_button" value="1" class="custom-control-input">
-                <label class="custom-control-label" for="adult_button">成年向けコンテンツを表示する</label>
-            </div>
-        </div>
-    </fieldset>
+
+
 
     <script type="text/javascript">
-        $(function(){
-            $('#adult_button').on(function() {
-                $.cookie('adult', '0', { expires: 30 });
-                Cookies.set('name', 'value', { expires: 7 });
-                alert("クリック");
+        $(function() {
+            $('#adult_button').click(function () {
+                if (Cookies.get('adult_check') == "0" || Cookies.get('adult_check') == undefined) {
+                    Cookies.set('adult_check', '1', {expires: 7});
+                    $('#adult_or').html('成年向けコンテンツは表示しない');
+                } else {
+                    Cookies.set('adult_check', '0', {expires: 7});
+                    $('#adult_or').html('成年向けコンテンツも表示する');
+                }
             });
         });
     </script>

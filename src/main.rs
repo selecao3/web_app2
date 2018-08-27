@@ -48,12 +48,11 @@ struct UserCookies{
 #[get("/")]
 fn home(conn:db::Connection, mut cookie:Cookies) -> Template{
     if let Some(_) = cookie.get_private("account"){
-        let mut context = Context::row_image(&conn);
+        let mut context = Context::row_image(&conn, cookie);
         let context = Context{user_lisence:true, .. context};
-
         return Template::render("news", &context)
     }else {
-        return Template::render("news", Context::row_image(&conn));
+        return Template::render("news", Context::row_image(&conn, cookie));
     }
 }
 
@@ -138,14 +137,14 @@ fn user(connection: db::Connection, cookies:Cookies) -> Template {  // <- reques
 }*/
 #[get("/creater/account/<account>", rank = 2)]              // <- route attribute
 fn user(connection: db::Connection, mut cookies:Cookies, account:String) -> Template {  // <- request handler
-    //そのユーザー自身がユーザー自身のページに入ったとき
     match cookies.get_private("account") {
         Some(c) => if c.value() == account.as_str(){
+            //そのユーザー自身がユーザー自身のページに入ったとき
             return Template::render("profile",Context::row(&connection, cookies))
         }else {
-            return Template::render("profile",Context::account_row(&connection, account))
+            return Template::render("profile",Context::account_row(&connection, account, cookies))
         }
-        None => return Template::render("profile",Context::account_row(&connection, account))
+        None => return Template::render("profile",Context::account_row(&connection, account, cookies))
 
     }
 }
@@ -215,32 +214,77 @@ fn files(path: PathBuf) -> Option<NamedFile> {
 }
 
 impl Context{
-    fn row_image(connection: &db::Connection) -> Context{
-        //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
-        //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
-        Context{
-            post_img: news_posts::read_gallary(&connection),
-            profile:creater_setting::read_profiles_all(&connection),
-            user_lisence: false
+    fn row_image(connection: &db::Connection, mut cookies:Cookies) -> Context{
+        if let Some(ac) = cookies.get("adult_check"){
+            //adult => 1
+            //not adult => 0
+            println!("adult");
+            Context{
+                post_img: news_posts::read_gallary(&connection, ac.value().to_string()),
+                profile:creater_setting::read_profiles_all(&connection),
+                user_lisence: false,
+            }
+        }else {
+            println!("else");
+            Context{
+                post_img: news_posts::read_gallary(&connection, "0".to_string()),
+                profile:creater_setting::read_profiles_all(&connection),
+                user_lisence: false,
+            }
+        }
+    }
+    fn row_news(connection: &db::Connection, mut cookies:Cookies) -> Context{
+        if let Some(ac) = cookies.get("adult_check"){
+            //adult => 1
+            //not adult => 0
+            println!("adult");
+            Context{
+                post_img: news_posts::read_gallary(&connection, ac.value().to_string()),
+                profile:creater_setting::read_profiles_all(&connection),
+                user_lisence: false,
+            }
+        }else {
+            println!("else");
+            Context{
+                post_img: news_posts::read_gallary(&connection, "0".to_string()),
+                profile:creater_setting::read_profiles_all(&connection),
+                user_lisence: false,
+            }
         }
     }
     fn row(connection: &db::Connection,mut cookies:Cookies) -> Context{
         //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
         //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
         let aaa = cookies.get_private("account");
-        Context{
-            post_img: news_posts::read_post_img(connection, aaa.clone()),
-            profile:creater_setting::read_profile(&connection, aaa.clone()),
-            user_lisence: true
+        if let Some(ac) = cookies.get("adult_check"){
+            Context{
+                post_img: news_posts::read_post_img(connection, aaa.clone(), ac.value().to_string()),
+                profile:creater_setting::read_profile(&connection, aaa.clone()),
+                user_lisence: true,
+            }
+        }else {
+            Context{
+                post_img: news_posts::read_post_img(connection, aaa.clone(), "0".to_string()),
+                profile:creater_setting::read_profile(&connection, aaa.clone()),
+                user_lisence: true,
+            }
         }
     }
-    fn account_row(connection: &db::Connection, account:String) -> Context{
+    fn account_row(connection: &db::Connection, account:String,cookies:Cookies) -> Context{
         //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
         //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
-        Context{
-            post_img: news_posts::read_post_img_normal(connection, account.clone()),
-            profile:creater_setting::read_profile_normal(&connection, account.clone()),
-            user_lisence: false
+        if let Some(ac) = cookies.get("adult_check"){
+            Context{
+                post_img: news_posts::read_post_img_normal(connection, account.clone(),ac.value().to_string() ),
+                profile:creater_setting::read_profile_normal(&connection, account.clone()),
+                user_lisence: false,
+            }
+        }else {
+            Context{
+                post_img: news_posts::read_post_img_normal(connection, account.clone(),"0".to_string()),
+                profile:creater_setting::read_profile_normal(&connection, account.clone()),
+                user_lisence: false,
+            }
         }
     }
 }
@@ -255,12 +299,12 @@ fn user_setting(connection: db::Connection, cookies:Cookies) -> Template {
 #[get("/images")]              // <- route attribute
 fn images(connection: db::Connection,mut cookie:Cookies) -> Template {  // <- request handler
     if let Some(_) = cookie.get_private("account"){
-        let mut context = Context::row_image(&connection);
+        let mut context = Context::row_image(&connection, cookie);
         let context = Context{user_lisence:true, .. context};
 
         return Template::render("gallary", &context)
     }else {
-        return Template::render("gallary", Context::row_image(&connection));
+        return Template::render("gallary", Context::row_image(&connection, cookie));
     }
 }
 #[delete("/creater/account/delete/<id>")]
