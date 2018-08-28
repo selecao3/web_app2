@@ -76,7 +76,7 @@
     <div class="bs-component">
         <div class="table-active" style="width: 100%">
             <div style="justify-content: space-between;display: inline-flex;flex-wrap: wrap;">
-                {% for tmp in profile%}
+                {% for tmp in profile %}
                     <div style="margin-right: 10px;margin-left: 10px;margin-top: 40px;">
                         <div class="card border-primary" style="width: 300px;height: 400px;box-shadow: 0px 0px 10px;">
                             <h4 class="card-header">{{ tmp.name }}</h4>
@@ -84,7 +84,7 @@
                             <img class="cover" src="{{ tmp.profile_img}}" alt="Card image">
 
                             <div class="card-body text-primary">
-                                <pre class="card-text" style="height: 50px;">{{ tmp.profile_text|safe|truncate(length=10)}}</pre>
+                                <pre class="card-text" style="height: 50px;">{{ tmp.profile_text|truncate(length=10)}}</pre>
                                 <a href="/creater/account/{{ tmp.account }}">
                                     <button style="box-shadow: 0px 0px 10px;" type="button" class="btn btn-primary">{{ tmp.name}}さんのページへ</button>
                                 </a>

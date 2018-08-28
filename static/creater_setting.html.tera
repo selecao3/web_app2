@@ -2,6 +2,9 @@
 {% block content %}
 
 
+
+
+
     {% for pro in profile%}
         <form action="/creater/user/setting" method="post" name="form2" id="id_form2" enctype="multipart/form-data">
             <div class="form-group">
@@ -13,11 +16,23 @@
                 <label for="text">紹介文</label>
                 <textarea name="profile_text" class="form-control" id="profile_text" cols="30" rows="10">{{ pro.profile_text }}</textarea>
             </div>
-            {#    <button type="button" class="btn btn-primary">Signup!!</button>#}
-            <input name="profile_img" type="file" accept="image/*">
+
+
+            <div class="imagePreview"></div>
+
+
+            <div class="input-group">
+                <label class="input-group-btn">
+        <span class="btn btn-primary">
+            ファイルの選択<input type="file" name="profile_img" style="display:none">
+        </span>
+                </label>
+            </div>
+
+
             <br>
             <br>
-            <input type="submit">
+            <button type="submit" class="btn btn-primary">完了</button>
         </form>
     {% endfor %}
 

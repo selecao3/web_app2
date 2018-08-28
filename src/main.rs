@@ -14,9 +14,6 @@ extern crate chrono;
 extern crate chrono_tz;
 extern crate regex;
 
-
-
-
 use news_posts::static_rocket_route_info_for_multipart_upload;
 use signup::static_rocket_route_info_for_signup_post;
 use creater_setting::static_rocket_route_info_for_multipart_user_setting;

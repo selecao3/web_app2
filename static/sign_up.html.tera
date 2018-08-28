@@ -2,7 +2,7 @@
 {% block content %}
 
     <!--1ブロック分-->
-    <h1 class="display-4" >アカウント登録</h1>
+    <h1>アカウント登録</h1>
     <div style="margin-top: 50px;margin-bottom: 50px;">
         <form action="/creater/profile" method="post" >
             <div class="form-group">
@@ -21,10 +21,11 @@
             {% if message %}
                 <div class="invalid-feedback">{{ message }}</div>
             {% endif %}
-            <input type="submit">
+            <button type="submit" class="btn btn-primary">登録する</button>
             {#    <button type="button" class="btn btn-primary">Signup!!</button>#}
         </form>
     </div>
+    <hr>
 
     <a href="/login">
         <button type="button" class="btn btn-primary">登録済みの方はこちらへ</button>

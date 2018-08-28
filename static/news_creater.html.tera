@@ -1,6 +1,16 @@
 {% extends "Home" %}
 {% block content %}
 
+    <style>
+        .imagePreview {
+            width: 100%;
+            height: 180px;
+            background-position: center center;
+            background-size: cover;
+            -webkit-box-shadow: 0 0 1px 1px rgba(0, 0, 0, .3);
+            display: inline-block;
+        }
+    </style>
 
         <form action="/creater/account/post/form" method="post" name="form2" id="id_form2" enctype="multipart/form-data">
             <h1>記事の投稿</h1>
@@ -15,28 +25,30 @@
                     <textarea class="lead" name="body" id="body" rows="10" placeholder="本文" style="width: 100%"></textarea>
                 </fieldset>
                 <br>
-                <label for="image_file">
-            <span class="btn btn-dark">
-                ファイルを選択
-                <input style="display: none" id="image_file" name="file[]" type="file" accept="image/*" multiple="multiple">
-                <!--name="hogehoge[]"で複数のファイルのアップロードが可能に-->
-            </span>
-                </label>
+
+
+                <div class="input-group">
+                    <label class="input-group-btn">
+        <span class="btn btn-dark">
+            ファイルの選択<input style="display: none" id="image_file" name="file[]" type="file" accept="image/*" multiple="multiple">
+        </span>
+                    </label>
+                </div>
                 <br>
 
-                    <fieldset>
-                        <legend>投稿内容</legend>
-                        <div class="form-group">
-                            <div class="custom-control custom-radio">
-                                <input type="radio" id="customRadio1" name="customRadio" value="0" class="custom-control-input" checked="">
-                                <label class="custom-control-label" for="customRadio1">一般向け</label>
-                            </div>
-                            <div class="custom-control custom-radio">
-                                <input type="radio" id="customRadio2" name="customRadio" value="1" class="custom-control-input">
-                                <label class="custom-control-label" for="customRadio2">成年向け</label>
-                            </div>
+                <fieldset>
+                    <legend>投稿内容</legend>
+                    <div class="form-group">
+                        <div class="custom-control custom-radio">
+                            <input type="radio" id="customRadio1" name="customRadio" value="0" class="custom-control-input" checked="">
+                            <label class="custom-control-label" for="customRadio1">一般向け</label>
                         </div>
-                    </fieldset>
+                        <div class="custom-control custom-radio">
+                            <input type="radio" id="customRadio2" name="customRadio" value="1" class="custom-control-input">
+                            <label class="custom-control-label" for="customRadio2">成年向け</label>
+                        </div>
+                    </div>
+                </fieldset>
 
                 <input class="btn btn-dark" type="submit" placeholder="送信">
             </div>
