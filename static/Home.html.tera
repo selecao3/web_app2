@@ -10,6 +10,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
     <script type="text/javascript" src="dist/js/bootstrap.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <script src="dist/js/jquery_upload_Thumbs.js"></script>
+
 
 
 
@@ -68,13 +70,13 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/creater">Creaters</a>
+                    <a class="nav-link" href="/creater">クリエイター</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/images">Gallary</a>
+                    <a class="nav-link" href="/images">ギャラリー</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/about_me">About me</a>
+                    <a class="nav-link" href="/about_me">管理人について</a>
                 </li>
 
                 {% if user_lisence == true %}
@@ -87,12 +89,23 @@
                     </li>
                     {% else %}
                 <li class="nav-item">
-                    <a href="/signup">
+                    <a href="/login">
                         <button type="button" class="btn btn-secondary">
-                            Sign up
+                            ログイン
                         </button>
                     </a>
                 </li>
+                    <div style="margin-left: 25px;">
+                        <li class="nav-item">
+                            <a href="/signup">
+                                <button type="button" class="btn btn-warning">
+                                    初めての方はこちら！！
+                                </button>
+                            </a>
+                        </li>
+                    </div>
+
+
                 {% endif %}
 
             </ul>

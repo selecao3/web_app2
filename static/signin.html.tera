@@ -3,7 +3,7 @@
 
     <!--1ブロック分-->
 
-    <h1 class="display-4">サインイン</h1>
+    <h1>サインイン</h1>
     <div style="margin-top: 50px">
         <form action="/creater/profile/signin" method="post" >
             <div class="form-group">
@@ -18,7 +18,7 @@
             {% endif %}
             </div>
 
-            <input type="submit">
+            <button type="submit" class="btn btn-primary">送信する</button>
             {#    <button type="button" class="btn btn-primary">Signup!!</button>#}
         </form>
     </div>

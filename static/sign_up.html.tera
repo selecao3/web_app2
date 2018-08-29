@@ -25,10 +25,5 @@
             {#    <button type="button" class="btn btn-primary">Signup!!</button>#}
         </form>
     </div>
-    <hr>
-
-    <a href="/login">
-        <button type="button" class="btn btn-primary">登録済みの方はこちらへ</button>
-    </a>
 
 {% endblock content %}

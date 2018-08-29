@@ -11,24 +11,25 @@
                     クリエイターとファンのためのサイト
                 </p>
             </div>
+
         </div>
     </div>
     <style>
         div#tmp{
             width: 800px;
-            margin-top: 12em;
+            margin-top: 8em;
         }
     </style>
 
     <div id="tmp" class="col-lg-12">
         <div class="page-header">
-            <h1 style="margin-bottom: 20px">Latest news</h1>
+            <h1 style="margin-bottom: 20px">最新情報</h1>
         </div>
         <div class="bs-component">
-        {% set count = 0 %}
+            {% set count = 0 %}
             {% for i in post_img %}
-            {{i.name}}さんがタイトル「<a href="/creater/account/{{ i.account }}"><b>{{i.title}}</b></a>」を投稿しました！
-            <hr>
+                {{i.name}}さんがタイトル「<a href="/creater/account/{{ i.account }}"><b>{{i.title}}</b></a>」を投稿しました！
+                <hr>
                 {% set count = count + 1 %}
                 {% if count == 5 %}
                     <a href="#">以前のニュースはこちら</a>
