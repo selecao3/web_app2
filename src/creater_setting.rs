@@ -148,7 +148,6 @@ use diesel::prelude::*;
 
 //signup時のみ呼ばれる関数。初期値をセットする。
 pub fn insert(conn: &PgConnection,mut cookies: Cookies) -> bool{
-    println!("insertメソッド");
 
     let t = Profile{
         id: None,
@@ -163,7 +162,6 @@ pub fn insert(conn: &PgConnection,mut cookies: Cookies) -> bool{
 }
 
 fn update(profile:ProfileForm, conn: &PgConnection,mut cookies: Cookies) -> bool{
-    println!("updateメソッド");
 
     let t = Profile{
         id: None,
