@@ -68,7 +68,6 @@ fn multipart_user_setting(cont_type: &ContentType, data: Data, conn:Connection,m
 
 fn process_upload(boundary: &str, data: Data, conn:Connection,cookies:Cookies) -> io::Result<Vec<u8>> {
     let mut out = Vec::new();
-    println!("process_upload関数");
 
     // saves all fields, any field longer than 10kB goes to a temporary directory
     // Entries could implement FromData though that would give zero control over

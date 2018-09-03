@@ -331,7 +331,7 @@ fn images(connection: db::Connection,mut cookie:Cookies) -> Template {  // <- re
 #[delete("/creater/account/delete/<id>")]
 fn delete(mut cookie:Cookies, id: i32, conn: db::Connection) -> Result<Flash<Redirect>, ()> {
     if news_posts::posts_delete(id, &conn) {
-        Ok(Flash::success(Redirect::to(format!("/creater/account/{}",cookie.get_private("account").unwrap().value()).as_str()), "Todo was deleted."))
+        Ok(Flash::success(Redirect::to(format!("/creater/account/{}",cookie.get_private("account").unwrap().value()).as_str()), ""))
     } else {
         Err(())
     }

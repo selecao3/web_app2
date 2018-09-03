@@ -28,7 +28,6 @@
             </fieldset>
             <br>
             <fieldset>
-                <small>MarkDown記法が使えます</small>
                 <textarea class="lead" name="body" id="body" rows="10" placeholder="本文" style="width: 100%"></textarea>
             </fieldset>
             <br>
