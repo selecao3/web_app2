@@ -14,8 +14,6 @@
 
 
 
-
-
     <style type="text/css">
         .bs-component + .bs-component {
             margin-top: 1rem;
@@ -54,6 +52,9 @@
                 margin-bottom: 10px;
             }
         }
+    img {
+        max-width: 100%; /* This rule is very important, please do not ignore this! */
+    }
     </style>
 </head>
 <body>
@@ -78,6 +79,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/about_me">管理人について</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/help">ヘルプ</a>
+                </li>
 
                 {% if user_lisence == true %}
                     <li class="nav-item">
@@ -99,7 +103,7 @@
                         <li class="nav-item">
                             <a href="/signup">
                                 <button type="button" class="btn btn-warning">
-                                    初めての方はこちら！！
+                                    アカウントを作る！！
                                 </button>
                             </a>
                         </li>
@@ -129,13 +133,6 @@
         </div>
     </div>
 </div>
-
-
-
-
-
-
-
 
 
 </body>

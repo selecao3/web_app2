@@ -13,6 +13,7 @@ extern crate comrak;
 extern crate chrono;
 extern crate chrono_tz;
 extern crate regex;
+extern crate time;
 
 use news_posts::static_rocket_route_info_for_multipart_upload;
 use signup::static_rocket_route_info_for_signup_post;
@@ -22,6 +23,8 @@ use signout::static_rocket_route_info_for_signout_post;
 
 use rocket::response::Redirect;
 use rocket_contrib::Template;
+use rocket::response::content;
+
 
 
 
@@ -41,6 +44,14 @@ struct UserCookies{
 }
 //テンプレートファイルに渡すstruct
 
+#[catch(404)]
+fn not_found(req: &rocket::Request) -> content::Html<String> {
+    content::Html(format!("<p>'{}'というURLは存在しません</p>
+            <p>お手数ですが<a href=\"/\">ホーム</a>へお戻りください。</p>",
+            req.uri()))
+}
+
+
 //getメソッド群
 #[get("/")]
 fn home(conn:db::Connection, mut cookie:Cookies) -> Template{
@@ -53,6 +64,20 @@ fn home(conn:db::Connection, mut cookie:Cookies) -> Template{
     }
 }
 
+#[get("/help")]
+fn help(mut cookie:Cookies) -> Template {  // <- request handler
+    if let Some(_) = cookie.get_private("account"){
+        let context = UserCookies{
+            user_lisence: true
+        };
+        return Template::render("help", &context)
+    }else {
+        let context = UserCookies{
+            user_lisence: false
+        };
+        return Template::render("help", &context)
+    }
+}
 
 
 #[get("/signup")]              // <- route attribute
@@ -93,7 +118,6 @@ fn login(msg:Option<FlashMessage>,mut cookie:Cookies) -> Template {  // <- reque
         Some(m) => m.msg().to_string(),
         None => "".to_string()
     };
-    println!("{}",m);
 
     if let Some(_) = cookie.get_private("account"){
         let context = LoginMsg{
@@ -353,11 +377,11 @@ fn main() {
     rocket::ignite()
         .mount("/", routes![
 home,about_me,signup,login,signup_post,multipart_user_setting,
-all,creater_static,files,creater,user_setting,profile_static,user,news,images,signin_post,signout_post,delete
+all,creater_static,files,creater,user_setting,profile_static,user,news,images,signin_post,signout_post,delete,help
 ])
         .mount("/creater/account/post/", routes![multipart_upload])
         .manage(db::connect())
         .attach(Template::fairing())
-
+        .catch(catchers![not_found])
         .launch();
 }

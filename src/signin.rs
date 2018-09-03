@@ -12,9 +12,12 @@ use signup;
 use diesel::pg::PgConnection;
 use diesel::prelude::*;
 
+use time;
+
 use schema::creater::columns::password;
 use schema::creater;
 use schema::creater::dsl::{creater as all_creater};
+
 
 #[derive(FromForm, Clone)]
 struct SigninForm{
@@ -30,7 +33,10 @@ fn signin_post(mut cookies: Cookies, user: Form<SigninForm>, connection: db::Con
     let signupform = user.into_inner();
 
     if signupform.check(&connection){
-        let cookie = Cookie::new("account",signupform.account_flag.clone());
+        let mut cookie = Cookie::new("account",signupform.account_flag.clone());
+        let mut now = time::now();
+        now.tm_year += 1;
+        &cookie.set_expires(now);
         cookies.add_private(cookie);
         return Flash::success(Redirect::to(format!("/creater/account/{}",signupform.account_flag).as_str()), "")
     }else {

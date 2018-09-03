@@ -66,42 +66,42 @@
                         <div class="modal-header">
                             <h2 class="modal-title">{{ i.title }}</h2>
                             {% if user_lisence == true %}
-                                <form action="/creater/account/delete/{{ i.id }}" method="post">
-                                    <input type="hidden" name="_method" value="delete" placeholder="delete!!" class="btn-danger btn">
-                                    <input type="submit" class="btn btn-danger" value="消去する">
-                                </form>
+                                <a href="#" data-toggle="modal" data-target="#modal_delete{{ i.id }}">
+                                    <input type="button" class="btn btn-danger" value="消去する">
+                                </a>
                             {% endif %}
+
 
                         </div>
                         <div class="modal-body" >
                             <pre id="post_content" style="white-space: pre-wrap;font-size: 18px;">{{ i.body|safe }}</pre>
 
-                                <table style="margin: 0 auto">
-                                    <tr>
-                                        {% if i.img_url_1 != "" %}
-                                            <td>
-                                                <img src="{{ i.img_url_1 }}" class="cover post_img" style="margin-right: 70px;margin-bottom: 20px;" width="300px" alt="画像がありません">
-                                            </td>
-                                        {% endif %}
-                                        {% if i.img_url_2 != "" %}
-                                            <td>
-                                                <img src="{{ i.img_url_2 }}" class="cover post_img" width="300px" style="margin-bottom: 20px;" alt="画像がありません">
-                                            </td>
-                                        {% endif %}
-                                    </tr>
-                                    <tr>
-                                        {% if i.img_url_3 != "" %}
-                                            <td>
-                                                <img src="{{ i.img_url_3 }}" class="cover post_img" style="margin-right: 70px" width="300px" alt="画像がありません">
-                                            </td>
-                                        {% endif %}
-                                        {% if i.img_url_4 != "" %}
-                                            <td>
-                                                <img src="{{ i.img_url_4 }}" class="cover post_img" width="300px" alt="画像がありません">
-                                            </td>
-                                        {% endif %}
-                                    </tr>
-                                </table>
+                            <table style="margin: 0 auto">
+                                <tr>
+                                    {% if i.img_url_1 != "" %}
+                                        <td>
+                                            <img src="{{ i.img_url_1 }}" class="cover post_img" style="margin-right: 70px;margin-bottom: 20px;" width="300px" alt="画像がありません">
+                                        </td>
+                                    {% endif %}
+                                    {% if i.img_url_2 != "" %}
+                                        <td>
+                                            <img src="{{ i.img_url_2 }}" class="cover post_img" width="300px" style="margin-bottom: 20px;" alt="画像がありません">
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                                <tr>
+                                    {% if i.img_url_3 != "" %}
+                                        <td>
+                                            <img src="{{ i.img_url_3 }}" class="cover post_img" style="margin-right: 70px" width="300px" alt="画像がありません">
+                                        </td>
+                                    {% endif %}
+                                    {% if i.img_url_4 != "" %}
+                                        <td>
+                                            <img src="{{ i.img_url_4 }}" class="cover post_img" width="300px" alt="画像がありません">
+                                        </td>
+                                    {% endif %}
+                                </tr>
+                            </table>
 
                         </div>
                         <div class="modal-footer">
@@ -112,6 +112,31 @@
                 </div>
             </div>
         {% endfor %}
+
+    {% for post in post_img %}
+        <div class="modal" id="modal_delete{{ post.id }}">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <div class="modal-body">
+                  <p class="lead text-danger">「{{ post.title }}」を削除します</p>
+                </div>
+                  <div class="modal-footer">
+
+                          <form action="/creater/account/delete/{{ post.id }}" method="post" style="margin: unset;">
+                                  <input type="hidden" name="_method" value="delete" placeholder="削除する" class="btn-danger btn">
+                                  <input type="submit" class="btn btn-danger" value="消去する">
+                          </form>
+
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">キャンセル</button>
+                  </div>
+              </div>
+            </div>
+        </div>
+    {% endfor %}
+
+
+
+
 
     {#        <script>
             $('.click_btn').on('click', function () {
@@ -128,17 +153,17 @@
                 <div class="bs-component">
                     <table class="table table-hover">
                         {% for i in post_img %}
-                                {% if loop.index0 is divisibleby(2) %}
-                                    <tr>
-                                        <th scope="col"><a href="#" data-toggle="modal" data-target="#modal{{ i.id }}"><h3>{{ i.title }}</h3></a></th>
-                                        <td scope="col">{{ i.created_day|date(format="%Y年%m月%d日 %H時%M分") }}</td>
-                                    </tr>
-                                {% else %}
-                                    <tr class="table-primary">
-                                        <th scope="row"><a href="#" data-toggle="modal" data-target="#modal{{ i.id }}"><h3>{{ i.title }}</h3></a></th>
-                                        <td>{{ i.created_day|date(format="%Y年%m月%d日 %H時%M分") }}</td>
-                                    </tr>
-                                {% endif %}
+                            {% if loop.index0 is divisibleby(2) %}
+                                <tr>
+                                    <th scope="col"><a href="#" data-toggle="modal" data-target="#modal{{ i.id }}"><h3>{{ i.title }}</h3></a></th>
+                                    <td scope="col">{{ i.created_day|date(format="%Y年%m月%d日 %H時%M分") }}</td>
+                                </tr>
+                            {% else %}
+                                <tr class="table-primary">
+                                    <th scope="row"><a href="#" data-toggle="modal" data-target="#modal{{ i.id }}"><h3>{{ i.title }}</h3></a></th>
+                                    <td>{{ i.created_day|date(format="%Y年%m月%d日 %H時%M分") }}</td>
+                                </tr>
+                            {% endif %}
                         {% endfor %}
 
                     </table>

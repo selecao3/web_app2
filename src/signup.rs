@@ -16,6 +16,8 @@ use diesel::prelude::*;
 use schema::creater::columns::mail_address as mail;
 use rocket::http::{Cookies,Cookie};
 
+use time;
+
 pub use schema::creater;
 pub use schema::creater::dsl::{creater as all_creater};
 
@@ -43,7 +45,6 @@ fn signup_post(cookies: Cookies, user: Form<SignupForm>, connection: db::Connect
     let t = user.into_inner();
     let signupform = t.clone();
     if signupform.check_account() != true {
-        println!("check_account");
         Flash::error(Redirect::to("/signup"), "アカウントは半角英数字で入力してください。")
     }else {
         if signupform.check_double(&connection) == 0 {
@@ -63,7 +64,7 @@ fn signup_post(cookies: Cookies, user: Form<SignupForm>, connection: db::Connect
 impl SignupForm{
     fn check_account(&self) -> bool{
         //アカウントが半角英数字かどうか
-        let re = Regex::new("^[a-zA-Z0-9]+$").unwrap();
+        let re = Regex::new("^[a-zA-Z0-9_]+$").unwrap();
         re.is_match(&self.account.as_str())
     }
 
@@ -87,7 +88,11 @@ impl SignupForm{
             mail_address: self.mail_address,
             password: bcrypt::hash(self.password.trim(), bcrypt::DEFAULT_COST).unwrap(),
         };
-        let cookie_account = Cookie::new("account",t.clone().account);
+        let mut cookie_account = Cookie::new("account",t.clone().account);
+        let mut now = time::now();
+        now.tm_year += 1;
+
+        &cookie_account.set_expires(now);
         cookies.add_private(cookie_account.clone());
 
         creater_setting::insert(conn,cookies);
