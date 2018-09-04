@@ -110,14 +110,30 @@ use std::fs::rename;
 
 fn process_entries(entries: Entries, out: &mut Vec<u8>, conn:Connection, cookies:Cookies) -> io::Result<()>{
     {
-
-                println!("======¥n{:?}¥n========",entries.fields);
-/*        let file_data = &entries.fields.get(&"file".to_string()).unwrap().get(0).unwrap().data;*/
-        let title_data = &entries.fields.get(&"title".to_string()).unwrap().get(0).unwrap().data;
-        let body_data = &entries.fields.get(&"body".to_string()).unwrap().get(0).unwrap().data;
-        let adult_check = &entries.fields.get(&"customRadio".to_string()).unwrap().get(0).unwrap().data;
-
         let mut tmp:Vec<String> = Vec::new();
+        if let Some(title_data) = &entries.fields.get(&"title".to_string()){
+            let title = &title_data.get(0).unwrap().data;
+            if let SavedData::Text(title_string) = title{
+                tmp.push(title_string.to_string());
+            }
+        }else {
+            tmp.push("".to_string());
+        }
+        if let Some(body_data) = &entries.fields.get(&"body".to_string()){
+            let body = &body_data.get(0).unwrap().data;
+            if let SavedData::Text(body_string) = body{
+                tmp.push(body_string.to_string());
+            }
+        }else {
+            tmp.push("".to_string());
+        }
+
+        let adult_check = &entries.fields.get(&"customRadio".to_string()).unwrap().get(0).unwrap().data;
+        if let SavedData::Text(adult_check_flag) = adult_check{
+            tmp.push(adult_check_flag.to_string());
+        }
+
+
 
         for i in 0..4 {
             if let Some(file_data) = &entries.fields.get(&"file[]".to_string()){
@@ -143,32 +159,18 @@ fn process_entries(entries: Entries, out: &mut Vec<u8>, conn:Connection, cookies
             }
         }
 
-        if let SavedData::Text(title_string) = title_data{
-            tmp.push(title_string.to_string());
-        }
-        if let SavedData::Text(body_string) = body_data{
-            tmp.push(body_string.to_string());
-        }
-        if let SavedData::Text(adult_check_flag) = adult_check{
-            tmp.push(adult_check_flag.to_string());
-        }
+
         let t = PostImgForm{
-            title:tmp[4].clone(),
-            body:tmp[5].clone(),
-            adult_check:tmp[6].clone(),
-            img_url_1:tmp[0].clone(),
-            img_url_2:tmp[1].clone(),
-            img_url_3:tmp[2].clone(),
-            img_url_4:tmp[3].clone(),
+            title:tmp[0].clone(),
+            body:tmp[1].clone(),
+            adult_check:tmp[2].clone(),
+            img_url_1:tmp[3].clone(),
+            img_url_2:tmp[4].clone(),
+            img_url_3:tmp[5].clone(),
+            img_url_4:tmp[6].clone(),
         };
         insert(t,&conn,cookies);
 
-
-        /*        let hoge = entries.save_dir;
-                let hage = Perm(hoge.into_path());*/
-
-
-        /*        println!("{:?}", aaa.get(0).unwrap().data::File);*/
 
     }
     writeln!(out)
@@ -222,12 +224,12 @@ pub fn read_post_img(connection: &PgConnection, cookies:Option<Cookie>,adult_che
             .load::<PostImg>(connection)
             .expect("error")
     }else {
-            all_post_img
-        .filter(post_img::account.eq(cookies.unwrap().value()))
-        //accountが◯◯のものを取り出す
-        .order(post_img::id.desc())
-        .load::<PostImg>(connection)
-        .expect("error")
+        all_post_img
+            .filter(post_img::account.eq(cookies.unwrap().value()))
+            //accountが◯◯のものを取り出す
+            .order(post_img::id.desc())
+            .load::<PostImg>(connection)
+            .expect("error")
     }
 
 }

@@ -40,7 +40,6 @@ impl<'a, 'r> FromRequest<'a, 'r> for Connection {
     }
 }
 
-// For the convenience of using an &Connection as an &MysqlConnection.
 impl Deref for Connection {
     type Target = PgConnection;
 

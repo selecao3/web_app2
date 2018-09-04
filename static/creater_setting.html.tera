@@ -24,7 +24,7 @@
             <div class="input-group">
                 <label class="input-group-btn">
         <span class="btn btn-primary">
-            ファイルの選択<input type="file" name="profile_img" style="display:none">
+            ファイルの選択<input type="file" name="profile_img" accept="image/*" style="display:none">
         </span>
                 </label>
             </div>

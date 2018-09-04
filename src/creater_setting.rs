@@ -18,6 +18,7 @@ use chrono_tz::Tz;
 
 pub const JAPAN: Tz = Tz::Japan;
 
+use schema::profile::columns::profile_img as image_columns;
 
 pub use schema::profile;
 pub use schema::profile::dsl::profile as all_profile;
@@ -99,41 +100,51 @@ use db::Connection;
 use std::fs::rename;
 
 
-fn process_entries(entries: Entries, out: &mut Vec<u8>, conn:Connection,cookies:Cookies) -> io::Result<()> {
+fn process_entries(entries: Entries, out: &mut Vec<u8>, conn:Connection,mut cookies:Cookies) -> io::Result<()> {
     {
 
         /*        println!("======¥n{:?}¥n========",entries.fields.get(&"file".to_string()).unwrap().get(0));*/
         let mut tmp:Vec<String> = Vec::new();
 
-        let name= &entries.fields.get(&"name".to_string()).unwrap().get(0).unwrap().data;
-        let profile_text = &entries.fields.get(&"profile_text".to_string()).unwrap().get(0).unwrap().data;
-        let profile_img= &entries.fields.get(&"profile_img".to_string()).unwrap().get(0).unwrap().data;
-
-
-
-        if let SavedData::File(bbb,_) = profile_img{
-            println!("{:?}", bbb);
-            let mut s = bbb.to_str().unwrap().to_string();
-            s.push_str(".png");
-            rename(bbb.to_str().unwrap(),s.trim() ).unwrap();
-            println!("{}",s.trim_left_matches("static/").to_string());
-            //file名を*.pngに変更している.
-            let file_path = s.trim_left_matches("static/").to_string();
-
-            tmp.push(file_path);
+        if let Some(name_target) = &entries.fields.get(&"name".to_string()){
+            let name = &name_target.get(0).unwrap().data;
+            if let SavedData::Text(name_string) = name{
+                tmp.push(name_string.to_string());
+            }
+        }else {
+            tmp.push("".to_string());
         }
-        if let SavedData::Text(name_string) = name{
-            println!("{}",name_string);
-            tmp.push(name_string.to_string());
+        if let Some(profile_text) = &entries.fields.get(&"profile_text".to_string()){
+            let profile = &profile_text.get(0).unwrap().data;
+            if let SavedData::Text(profile_string) = profile{
+                tmp.push(profile_string.to_string());
+            }
+        }else {
+            tmp.push("".to_string());
         }
-        if let SavedData::Text(profile_string) = profile_text{
-            println!("{}",profile_string);
-            tmp.push(profile_string.to_string());
+        if let Some(profile_image) = &entries.fields.get(&"profile_img".to_string()){
+            let img = &profile_image.get(0).unwrap().data;
+            if let SavedData::File(bbb,_) = img{
+                let mut s = bbb.to_str().unwrap().to_string();
+                s.push_str(".png");
+                rename(bbb.to_str().unwrap(),s.trim() ).unwrap();
+                //file名を*.pngに変更している.
+                let file_path = s.trim_left_matches("static/").to_string();
+                tmp.push(file_path);
+            }else {
+                let cookie = cookies.get_private("account").unwrap();
+                tmp.push(insert_img(&conn, cookie).to_string());
+            }
         }
+/*            else {
+            tmp.push("".to_string());
+        }*/
+
         let t = ProfileForm{
-            profile_img:tmp[0].clone(),
-            name:tmp[1].clone(),
-            profile_text:tmp[2].clone(),
+            name:tmp[0].clone(),
+            profile_text:tmp[1].clone(),
+            profile_img:tmp[2].clone(),
+
         };
         update(t, &conn,cookies);
     }
@@ -185,8 +196,16 @@ fn update(profile:ProfileForm, conn: &PgConnection,mut cookies: Cookies) -> bool
         .is_ok()
 }
 
-
-
+pub fn insert_img(conn: &PgConnection,cookie: Cookie) -> String{
+    let img_path:String = match all_profile
+        .filter(profile::account.eq(cookie.value()))
+        .select(image_columns)
+        .first(conn) {
+        Ok(img) => img,
+        Err(_) => "".to_string()
+    };
+    img_path
+}
 
 use rocket::http::Cookie;
 

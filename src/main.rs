@@ -254,7 +254,7 @@ impl Context{
             }
         }
     }
-    fn row_news(connection: &db::Connection, mut cookies:Cookies) -> Context{
+/*    fn row_news(connection: &db::Connection, mut cookies:Cookies) -> Context{
         if let Some(ac) = cookies.get("adult_check"){
             //adult => 1
             //not adult => 0
@@ -272,7 +272,7 @@ impl Context{
                 user_lisence: false,
             }
         }
-    }
+    }*/
     fn row(connection: &db::Connection,mut cookies:Cookies) -> Context{
         //この関数でstructのメンバに値が渡される。＝＞"cookieのaccount"由来のものしか出さない。
         //つまり、account="hoge"で画像をpostしても、account="hage"のページでは表示されない。
